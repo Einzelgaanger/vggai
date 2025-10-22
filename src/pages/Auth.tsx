@@ -139,10 +139,11 @@ const Auth = () => {
         </div>
 
         <div className="mt-6 p-4 bg-muted rounded-lg">
-          <p className="text-xs font-semibold mb-2">Demo Accounts:</p>
+          <p className="text-xs font-semibold mb-2">First time? Sign up with these emails:</p>
           <p className="text-xs">CEO: ceo@company.com</p>
           <p className="text-xs">Developer: dev@company.com</p>
-          <p className="text-xs text-muted-foreground">Password: demo123</p>
+          <p className="text-xs text-muted-foreground">Password: demo123 (or any 6+ chars)</p>
+          <p className="text-xs text-muted-foreground mt-2">Your role is assigned automatically based on your email!</p>
         </div>
       </Card>
     </div>
