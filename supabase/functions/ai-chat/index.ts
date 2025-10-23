@@ -71,42 +71,76 @@ serve(async (req) => {
 
     const allowedEndpoints = permissions?.map(p => p.api_endpoint) || [];
     
-    // System prompt with role-based context
-    const systemPrompt = `You are an AI assistant for a corporate dashboard system. 
-The user has the role: ${roleData.role}
-They have access to the following API endpoints: ${allowedEndpoints.join(', ')}
+    // Fetch actual database data based on role
+    const { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('*, departments(name)')
+      .eq('id', user.id)
+      .single();
 
-When answering questions:
-1. Only provide information about data they have access to
-2. If they ask about restricted data, politely inform them it's not available for their role
-3. Be professional, concise, and helpful
-4. Provide insights based on the analytics they can access
+    const { data: allProfiles } = await supabaseClient
+      .from('profiles')
+      .select('id, email, full_name, departments(name)');
 
-Available endpoints explain what data the user can query:
-- /api/analytics/company-overview: Company-wide metrics and KPIs
-- /api/analytics/financial-metrics: Revenue, expenses, profit margins
-- /api/analytics/employee-stats: Headcount, turnover, satisfaction
-- /api/analytics/sales-performance: Sales data, quotas, conversions
-- /api/analytics/tech-metrics: System performance, deployments, bugs
-- /api/analytics/project-status: Project timelines and completion
-- /api/analytics/team-performance: Team productivity metrics
-- /api/analytics/budget-overview: Budget allocations and spending
-- /api/analytics/expense-reports: Detailed expense tracking
-- /api/analytics/recruitment-metrics: Hiring pipeline and time-to-hire
-- /api/analytics/performance-reviews: Employee review data
-- /api/analytics/product-metrics: Product usage and adoption
-- /api/analytics/user-engagement: User activity metrics
-- /api/analytics/pipeline-metrics: Sales pipeline health
-- /api/analytics/marketing-metrics: Campaign performance
-- /api/analytics/campaign-performance: Individual campaign results
-- /api/analytics/operations-metrics: Operational efficiency
-- /api/analytics/efficiency-stats: Process efficiency data
-- /api/analytics/support-metrics: Support team performance
-- /api/analytics/ticket-stats: Ticket volume and resolution
-- /api/analytics/data-insights: Advanced analytics
-- /api/analytics/reporting: Custom report generation
-- /api/analytics/system-health: Infrastructure health
-- /api/analytics/security-metrics: Security incidents and audits`;
+    const { data: allDepartments } = await supabaseClient
+      .from('departments')
+      .select('*');
+
+    const { data: allRoles } = await supabaseClient
+      .from('user_roles')
+      .select('role, profiles(email, full_name)');
+
+    // Build comprehensive context with real data
+    const userDeptName = (profileData?.departments as any)?.name || 'Not assigned';
+    const userContext = `
+User Profile:
+- Email: ${profileData?.email}
+- Full Name: ${profileData?.full_name}
+- Department: ${userDeptName}
+- Role: ${roleData.role}
+
+Department Information:
+${allDepartments?.map(d => `- ${d.name}: ${d.description || 'No description'}`).join('\n') || 'No departments found'}
+
+Company Users (${allProfiles?.length || 0} total):
+${allProfiles?.slice(0, 10).map(p => {
+  const deptName = (p.departments as any)?.name || 'No dept';
+  return `- ${p.full_name} (${p.email}) - ${deptName}`;
+}).join('\n') || 'No users found'}
+${allProfiles && allProfiles.length > 10 ? `... and ${allProfiles.length - 10} more users` : ''}
+
+Role Distribution:
+${allRoles?.reduce((acc: any, r: any) => {
+  acc[r.role] = (acc[r.role] || 0) + 1;
+  return acc;
+}, {}) ? Object.entries(allRoles?.reduce((acc: any, r: any) => {
+  acc[r.role] = (acc[r.role] || 0) + 1;
+  return acc;
+}, {})).map(([role, count]) => `- ${role}: ${count} user(s)`).join('\n') : 'No role data'}
+
+API Access:
+${permissions?.map(p => `- ${p.api_endpoint} (Read: ${p.can_read}, Write: ${p.can_write})`).join('\n') || 'No permissions'}`;
+    
+    // System prompt with role-based context and real data
+    const systemPrompt = `You are an AI assistant for a corporate dashboard system with access to real company data.
+
+${userContext}
+
+Your capabilities:
+1. Answer questions about company data, users, departments, and roles
+2. Provide insights based on the user's role and permissions
+3. Explain what data the user has access to
+4. Help with analytics and reporting based on available data
+5. Be professional, accurate, and helpful
+
+Important guidelines:
+- You have access to REAL data from the database shown above
+- Only discuss data the user has permission to access
+- Be specific and use actual numbers/names from the data
+- If asked about data not in your context, explain what you do have access to
+- Suggest relevant insights based on the role: ${roleData.role}
+
+When the user asks about metrics or analytics, provide specific information based on the data above.`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
