@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,15 +12,50 @@ interface Message {
   content: string;
 }
 
-const AIAssistant = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Hello! I'm your AI assistant. I can help you query data and analytics based on your role permissions. What would you like to know?",
-    },
-  ]);
+interface AIAssistantProps {
+  role: string | null;
+  userEmail: string;
+}
+
+const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const roleNames: Record<string, string> = {
+      ceo: "CEO",
+      cto: "CTO",
+      cfo: "CFO",
+      hr_manager: "HR Manager",
+      hr_coordinator: "HR Coordinator",
+      engineering_manager: "Engineering Manager",
+      senior_developer: "Senior Developer",
+      junior_developer: "Junior Developer",
+      product_manager: "Product Manager",
+      sales_manager: "Sales Manager",
+      sales_representative: "Sales Representative",
+      marketing_manager: "Marketing Manager",
+      marketing_specialist: "Marketing Specialist",
+      finance_manager: "Finance Manager",
+      accountant: "Accountant",
+      operations_manager: "Operations Manager",
+      support_manager: "Support Manager",
+      support_agent: "Support Agent",
+      data_analyst: "Data Analyst",
+      it_administrator: "IT Administrator",
+    };
+
+    const roleName = role ? roleNames[role] || role : "your role";
+    const welcomeMessage = `Hello! I'm your AI assistant specialized for ${roleName}. I have access to your role-specific data and can help you with analytics, insights, and answering questions about your dashboard. What would you like to know?`;
+    
+    setMessages([
+      {
+        role: "assistant",
+        content: welcomeMessage,
+      },
+    ]);
+  }, [role]);
 
   const streamChat = async (userMessage: Message) => {
     try {

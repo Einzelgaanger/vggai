@@ -75,7 +75,7 @@ const Dashboard = () => {
             <DashboardContent role={userRole} userEmail={user?.email || ""} />
           </div>
           <div className="lg:col-span-1">
-            <AIAssistant />
+            <AIAssistant role={userRole} userEmail={user?.email || ""} />
           </div>
         </div>
       </div>
