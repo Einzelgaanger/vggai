@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, MessageSquare } from "lucide-react";
+import { LogOut, LayoutGrid, Sparkles } from "lucide-react";
 
 interface DashboardNavProps {
   role: string | null;
@@ -15,7 +15,7 @@ const DashboardNav = ({ onSignOut, activeView, onViewChange, role, userEmail }: 
   };
 
   return (
-    <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <header className="sticky top-0 z-20 border-b bg-card backdrop-blur supports-[backdrop-filter]:bg-card/95">
       <div className="flex h-16 items-center gap-4 px-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -31,28 +31,30 @@ const DashboardNav = ({ onSignOut, activeView, onViewChange, role, userEmail }: 
           </div>
         </div>
         
-        <div className="flex-1 flex justify-center">
-          <div className="inline-flex rounded-lg border bg-muted p-1">
-            <Button
-              variant={activeView === "dashboard" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => onViewChange("dashboard")}
-              className="gap-2 rounded-md"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Button>
-            <Button
-              variant={activeView === "ai" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => onViewChange("ai")}
-              className="gap-2 rounded-md"
-            >
-              <MessageSquare className="h-4 w-4" />
-              AI Assistant
-            </Button>
-          </div>
-        </div>
+        <nav className="flex-1 flex justify-center gap-2">
+          <button
+            onClick={() => onViewChange("dashboard")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              activeView === "dashboard"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <LayoutGrid className="h-4 w-4" />
+            <span className="text-sm font-medium">Dashboard</span>
+          </button>
+          <button
+            onClick={() => onViewChange("ai")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              activeView === "ai"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <Sparkles className="h-4 w-4" />
+            <span className="text-sm font-medium">AI Assistant</span>
+          </button>
+        </nav>
         
         <Button variant="ghost" onClick={onSignOut} className="gap-2 h-9">
           <LogOut className="h-4 w-4" />
