@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Send, MessageSquare } from "lucide-react";
+import { Send, Brain } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import vggBackground from "@/assets/vgg-background.png";
@@ -48,7 +48,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
     };
 
     const roleName = role ? roleNames[role] || role : "your role";
-    const welcomeMessage = `Hello! I'm your AI assistant specialized for ${roleName}. I have access to your role-specific data and can help you with analytics, insights, and answering questions about your dashboard. What would you like to know?`;
+    const welcomeMessage = `Hello! I'm AKILI, your AI assistant specialized for ${roleName}. I have access to your role-specific data and can help you with analytics, insights, and answering questions about your dashboard. What would you like to know?`;
     
     setMessages([
       {
@@ -214,10 +214,10 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
       <div className="sticky top-16 z-10 bg-primary/95 backdrop-blur-sm border-b border-border px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <MessageSquare className="h-5 w-5 text-primary-foreground" />
+            <Brain className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-primary-foreground">AI Assistant</h2>
+            <h2 className="text-lg font-semibold text-primary-foreground">AKILI AI Assistant</h2>
             <p className="text-xs text-primary-foreground/80">Role-specific insights and guidance</p>
           </div>
         </div>
@@ -246,7 +246,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
             >
               {message.role === "assistant" && (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="h-4 w-4 text-primary-foreground" />
+                  <Brain className="h-4 w-4 text-primary-foreground" />
                 </div>
               )}
               <div
@@ -257,20 +257,16 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
                 }`}
               >
                 <p 
-                  className={`text-sm leading-relaxed whitespace-pre-wrap ${
-                    !expandedMessages.has(index) ? 'line-clamp-4' : ''
+                  className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
+                    message.role === "user" && !expandedMessages.has(index) ? 'line-clamp-4' : ''
                   }`}
                 >
                   {message.content}
                 </p>
-                {message.content.split('\n').length > 4 && (
+                {message.role === "user" && message.content.length > 200 && (
                   <button
                     onClick={() => toggleMessageExpansion(index)}
-                    className={`text-xs mt-2 underline ${
-                      message.role === "user" 
-                        ? "text-primary-foreground/80 hover:text-primary-foreground" 
-                        : "text-primary hover:text-primary/80"
-                    }`}
+                    className="text-xs mt-2 underline text-primary-foreground/80 hover:text-primary-foreground"
                   >
                     {expandedMessages.has(index) ? 'Show Less' : 'Read More'}
                   </button>
@@ -286,7 +282,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
           {isLoading && (
             <div className="flex gap-3 justify-start">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-               <MessageSquare className="h-4 w-4 text-primary-foreground" />
+               <Brain className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="rounded-xl px-4 py-3 bg-white border border-border shadow-lg">
                 <div className="flex items-center gap-1.5">
