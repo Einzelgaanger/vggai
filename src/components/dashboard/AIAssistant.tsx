@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Send, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import vggLogo from "@/assets/vgg-logo.jpeg";
+import vggBackground from "@/assets/vgg-background.png";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +19,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -186,15 +187,26 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
     return userEmail.charAt(0).toUpperCase();
   };
 
+  const toggleMessageExpansion = (index: number) => {
+    setExpandedMessages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div 
-      className="flex flex-col h-[calc(100vh-4rem)] relative bg-[#f8f9fa]"
+      className="flex flex-col h-[calc(100vh-4rem)] relative"
       style={{
-        backgroundImage: `url(${vggLogo})`,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${vggBackground})`,
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: '40%',
-        backgroundBlendMode: 'overlay',
+        backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
       }}
     >
@@ -240,11 +252,29 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
               <div
                 className={`rounded-xl px-4 py-3 max-w-[75%] ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-white text-foreground shadow-md border border-border"
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "bg-white text-foreground shadow-lg border border-border"
                 }`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                <p 
+                  className={`text-sm leading-relaxed whitespace-pre-wrap ${
+                    !expandedMessages.has(index) ? 'line-clamp-4' : ''
+                  }`}
+                >
+                  {message.content}
+                </p>
+                {message.content.split('\n').length > 4 && (
+                  <button
+                    onClick={() => toggleMessageExpansion(index)}
+                    className={`text-xs mt-2 underline ${
+                      message.role === "user" 
+                        ? "text-primary-foreground/80 hover:text-primary-foreground" 
+                        : "text-primary hover:text-primary/80"
+                    }`}
+                  >
+                    {expandedMessages.has(index) ? 'Show Less' : 'Read More'}
+                  </button>
+                )}
               </div>
               {message.role === "user" && (
                 <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
@@ -256,9 +286,9 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
           {isLoading && (
             <div className="flex gap-3 justify-start">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="h-4 w-4 text-primary-foreground" />
+               <MessageSquare className="h-4 w-4 text-primary-foreground" />
               </div>
-              <div className="rounded-xl px-4 py-3 bg-white border border-border shadow-md">
+              <div className="rounded-xl px-4 py-3 bg-white border border-border shadow-lg">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
                   <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
