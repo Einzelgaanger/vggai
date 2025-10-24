@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/dashboard/AppSidebar";
 import DashboardNav from "@/components/dashboard/DashboardNav";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import AIAssistant from "@/components/dashboard/AIAssistant";
@@ -13,6 +11,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<"dashboard" | "ai">("dashboard");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,26 +67,22 @@ const Dashboard = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar role={userRole} userEmail={user?.email || ""} />
-        <div className="flex-1 flex flex-col">
-          <DashboardNav role={userRole} onSignOut={handleSignOut} />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-6 max-w-7xl">
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div className="xl:col-span-2">
-                  <DashboardContent role={userRole} userEmail={user?.email || ""} />
-                </div>
-                <div className="xl:col-span-1" id="ai-assistant">
-                  <AIAssistant role={userRole} userEmail={user?.email || ""} />
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen bg-background">
+      <DashboardNav 
+        role={userRole} 
+        onSignOut={handleSignOut}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        userEmail={user?.email || ""}
+      />
+      <main className="container mx-auto p-6 max-w-7xl">
+        {activeView === "dashboard" ? (
+          <DashboardContent role={userRole} userEmail={user?.email || ""} />
+        ) : (
+          <AIAssistant role={userRole} userEmail={user?.email || ""} />
+        )}
+      </main>
+    </div>
   );
 };
 
