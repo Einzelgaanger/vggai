@@ -40,20 +40,12 @@ serve(async (req) => {
       });
     }
 
-    // Parallel data fetching for speed
-    const [
-      { data: roleData, error: roleError },
-      { data: profileData },
-      { data: allProfiles },
-      { data: allDepartments },
-      { data: allRoles }
-    ] = await Promise.all([
-      supabaseClient.from('user_roles').select('role').eq('user_id', user.id).single(),
-      supabaseClient.from('profiles').select('*, departments(name)').eq('id', user.id).single(),
-      supabaseClient.from('profiles').select('id, email, full_name, departments(name)'),
-      supabaseClient.from('departments').select('*'),
-      supabaseClient.from('user_roles').select('role, profiles(email, full_name)')
-    ]);
+    // Get user's role
+    const { data: roleData, error: roleError } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
 
     if (roleError || !roleData) {
       console.error('Role fetch error:', roleError);
@@ -77,106 +69,78 @@ serve(async (req) => {
       });
     }
 
-    // Prepare data for system prompt
-    const userDeptName = (profileData?.departments as any)?.name || 'Not assigned';
-    const userRole = roleData.role;
-    const userEmail = user.email || profileData?.email || 'Unknown';
+    const allowedEndpoints = permissions?.map(p => p.api_endpoint) || [];
     
-    // Build JSON datasets
-    const allUsers = allProfiles?.map(p => ({
-      email: p.email,
-      full_name: p.full_name,
-      department: (p.departments as any)?.name || 'Unassigned'
-    })) || [];
+    // Fetch actual database data based on role
+    const { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('*, departments(name)')
+      .eq('id', user.id)
+      .single();
 
-    const departmentsWithHeadcount = allDepartments?.map(d => {
-      const count = allUsers.filter(u => u.department === d.name).length;
-      return {
-        name: d.name,
-        description: d.description,
-        headcount: count
-      };
-    }) || [];
+    const { data: allProfiles } = await supabaseClient
+      .from('profiles')
+      .select('id, email, full_name, departments(name)');
 
-    const roleDistribution = allRoles?.reduce((acc: any, r: any) => {
-      acc[r.role] = (acc[r.role] || 0) + 1;
-      return acc;
-    }, {}) || {};
+    const { data: allDepartments } = await supabaseClient
+      .from('departments')
+      .select('*');
 
-    const apiPermissions = permissions?.map(p => ({
-      endpoint: p.api_endpoint,
-      can_read: p.can_read,
-      can_write: p.can_write
-    })) || [];
+    const { data: allRoles } = await supabaseClient
+      .from('user_roles')
+      .select('role, profiles(email, full_name)');
 
-    // Build the comprehensive system prompt
-    const systemPrompt = `
-You are AKILI, an expert-level AI assistant for our company. You are running on lovable.dev and your brain is 'google/gemini-2.5-flash'.
-Your persona is that of a proactive, data-savvy, and insightful partner.
+    // Build comprehensive context with real data
+    const userDeptName = (profileData?.departments as any)?.name || 'Not assigned';
+    const userContext = `
+User Profile:
+- Email: ${profileData?.email}
+- Full Name: ${profileData?.full_name}
+- Department: ${userDeptName}
+- Role: ${roleData.role}
 
----
-### 1. The User You Are Talking To
-This is the user's information. Use their role to understand their perspective.
+Department Information:
+${allDepartments?.map(d => `- ${d.name}: ${d.description || 'No description'}`).join('\n') || 'No departments found'}
 
-* **User Role:** ${userRole}
-* **User Email:** ${userEmail}
-* **User Department:** ${userDeptName}
+Company Users (${allProfiles?.length || 0} total):
+${allProfiles?.slice(0, 10).map(p => {
+  const deptName = (p.departments as any)?.name || 'No dept';
+  return `- ${p.full_name} (${p.email}) - ${deptName}`;
+}).join('\n') || 'No users found'}
+${allProfiles && allProfiles.length > 10 ? `... and ${allProfiles.length - 10} more users` : ''}
 
----
-### 2. Your Core Directives (How You MUST Behave)
+Role Distribution:
+${allRoles?.reduce((acc: any, r: any) => {
+  acc[r.role] = (acc[r.role] || 0) + 1;
+  return acc;
+}, {}) ? Object.entries(allRoles?.reduce((acc: any, r: any) => {
+  acc[r.role] = (acc[r.role] || 0) + 1;
+  return acc;
+}, {})).map(([role, count]) => `- ${role}: ${count} user(s)`).join('\n') : 'No role data'}
 
-**Directive A: YOU MUST USE THE DATA PROVIDED TO YOU.**
-You have been given real-time company data *directly in this prompt* (see section 3). Your FIRST priority is to answer the user's question by searching and analyzing THIS data.
-* **DO:** If the user asks "How many people are in Engineering?" and the context (in Section 3) shows a list of departments, you WILL count them and answer "There are 15 people in the Engineering department."
-* **DO NOT:** Do NOT say "I cannot access that" if the data is already in your context. This is a critical failure.
+API Access:
+${permissions?.map(p => `- ${p.api_endpoint} (Read: ${p.can_read}, Write: ${p.can_write})`).join('\n') || 'No permissions'}`;
+    
+    // System prompt with role-based context and real data
+    const systemPrompt = `You are an AI assistant for a corporate dashboard system with access to real company data.
 
-**Directive B: BE A SMART TRANSLATOR, NOT A DUMB INTERFACE.**
-The user does not speak "API." They will ask for "2023," "last month," or "Jane Doe." Your job is to *translate* this natural language into the correct query or data filter.
-* **DO:** If the user asks for "metrics for 2023," you WILL understand this means a date range of '2023-01-01' to '2023-12-31' and apply it to the relevant data or API.
-* **DO NOT:** Do NOT tell the user you "cannot filter by year." This is a critical failure.
+${userContext}
 
-**Directive C: NEVER MENTION YOUR LIMITATIONS OR THE API.**
-The user does not care about "endpoints," "interfaces," "APIs," or your "permissions." These are for your internal knowledge only. Never expose this technical jargon.
-* **CRITICAL FAILURE (AVOID):** "I'm sorry, I do not have the ability to filter by '2023'. The available endpoint /api/analytics/marketing-metrics..."
-* **CORRECT RESPONSE:** "Pulling the marketing metrics for 2023: [Data...]"
+Your capabilities:
+1. Answer questions about company data, users, departments, and roles
+2. Provide insights based on the user's role and permissions
+3. Explain what data the user has access to
+4. Help with analytics and reporting based on available data
+5. Be professional, accurate, and helpful
 
----
-### 3. Company Data Context (USE THIS DATA FIRST)
-This is real-time data from our database. Use it to answer the user's questions.
+Important guidelines:
+- You have access to REAL data from the database shown above
+- Only discuss data the user has permission to access
+- Be specific and use actual numbers/names from the data
+- If asked about data not in your context, explain what you do have access to
+- Suggest relevant insights based on the role: ${roleData.role}
 
-**All Company Users:**
-${JSON.stringify(allUsers, null, 2)}
-
-**All Departments & Headcount:**
-${JSON.stringify(departmentsWithHeadcount, null, 2)}
-
-**Company Role Distribution:**
-${JSON.stringify(roleDistribution, null, 2)}
-
----
-### 4. API Permissions Context (Your "Tools")
-This is the list of API tools you are allowed to *use* (but not talk about). You only need this if the answer is NOT in the Company Data Context above.
-
-* **User's Permissions:** ${JSON.stringify(apiPermissions, null, 2)}
-
----
-### 5. Example Scenarios (How to Behave)
-
-**Scenario 1: (Using In-Context Data)**
-* **User:** "How many people are in the Marketing department?"
-* **AI (Internal Thought):** *The 'All Departments' JSON in my context (Section 3) says 'Marketing: 12'. I will answer directly.*
-* **AI (Correct Response):** "There are 12 people in the Marketing department."
-
-**Scenario 2: (Using API Translation)**
-* **User:** "show me marketing metrics for 2023"
-* **AI (Internal Thought):** *The user has permission for '/api/analytics/marketing-metrics'. The data is not in my context. I must translate '2023' into a date range for that API.*
-* **AI (Correct Response):** "Pulling the marketing metrics for 2023: [Data...]"
-
-**Scenario 3: (Handling Ambiguity)**
-* **User:** "how did we do last quarter?"
-* **AI (Internal Thought):** *Today is ${new Date().toISOString()}. 'Last quarter' means the most recently completed one. I will assume this and state it.*
-* **AI (Correct Response):** "Showing the performance for **last quarter (Q3 2025)**: We generated $X.XX million... [Data...]"
-`;
+When the user asks about metrics or analytics, provide specific information based on the data above.`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
