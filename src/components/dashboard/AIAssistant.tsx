@@ -48,7 +48,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
     };
 
     const roleName = role ? roleNames[role] || role : "your role";
-    const welcomeMessage = `Hello! I'm AKILI, your AI assistant specialized for ${roleName}. I have access to your role-specific data and can help you with analytics, insights, and answering questions about your dashboard. What would you like to know?`;
+    const welcomeMessage = `Hello! I'm VGG Assistant, your AI assistant specialized for ${roleName}. I have access to your role-specific data and can help you with analytics, insights, and answering questions about your dashboard. What would you like to know?`;
     
     setMessages([
       {
@@ -217,7 +217,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
             <Brain className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-primary-foreground">AKILI AI Assistant</h2>
+            <h2 className="text-lg font-semibold text-primary-foreground">VGG Assistant</h2>
             <p className="text-xs text-primary-foreground/80">Role-specific insights and guidance</p>
           </div>
         </div>
