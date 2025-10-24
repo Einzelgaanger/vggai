@@ -1,12 +1,9 @@
-import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, MessageSquare } from "lucide-react";
-import { useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import vggLogo from "@/assets/vgg-logo.jpeg";
 
 interface Message {
   role: "user" | "assistant";
@@ -157,6 +154,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
+    resetTextarea();
     setIsLoading(true);
 
     await streamChat(userMessage);
@@ -177,29 +175,56 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
     }
   };
 
+  const resetTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+  };
+
   const getUserInitials = () => {
     if (!userEmail) return "U";
     return userEmail.charAt(0).toUpperCase();
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div 
+      className="flex flex-col h-[calc(100vh-4rem)] relative bg-[#f8f9fa]"
+      style={{
+        backgroundImage: `url(${vggLogo})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center center',
+        backgroundSize: '40%',
+        backgroundBlendMode: 'overlay',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       {/* Sticky AI Assistant Sub-header */}
-      <div className="sticky top-16 z-10 bg-primary-light border-b border-border px-6 py-4">
+      <div className="sticky top-16 z-10 bg-primary/95 backdrop-blur-sm border-b border-border px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">AI Assistant</h2>
-            <p className="text-xs text-muted-foreground">Role-specific insights and guidance</p>
+            <h2 className="text-lg font-semibold text-primary-foreground">AI Assistant</h2>
+            <p className="text-xs text-primary-foreground/80">Role-specific insights and guidance</p>
           </div>
         </div>
       </div>
 
-      {/* Scrollable chat messages area */}
-      <ScrollArea className="flex-1 px-6" ref={scrollAreaRef}>
-        <div className="py-6 space-y-6 max-w-4xl mx-auto">
+      {/* Scrollable chat messages area - hide scrollbar */}
+      <div 
+        className="flex-1 px-6 overflow-y-auto"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        <style>{`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        <div className="py-6 space-y-6 max-w-4xl mx-auto pb-32">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -215,15 +240,15 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
               <div
                 className={`rounded-xl px-4 py-3 max-w-[75%] ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground shadow-soft"
-                    : "bg-card text-foreground shadow-soft border border-border"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-white text-foreground shadow-md border border-border"
                 }`}
               >
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
               </div>
               {message.role === "user" && (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-muted-foreground">{getUserInitials()}</span>
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-semibold text-primary-foreground">{getUserInitials()}</span>
                 </div>
               )}
             </div>
@@ -233,7 +258,7 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
                 <MessageSquare className="h-4 w-4 text-primary-foreground" />
               </div>
-              <div className="rounded-xl px-4 py-3 bg-card border border-border shadow-soft">
+              <div className="rounded-xl px-4 py-3 bg-white border border-border shadow-md">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
                   <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
@@ -243,31 +268,38 @@ const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Sticky pill input bar at bottom */}
-      <div className="sticky bottom-0 bg-background border-t border-border p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-end gap-2 bg-card rounded-full border border-input px-4 py-2 shadow-soft">
-            <Textarea
-              ref={textareaRef}
-              placeholder="Ask me anything about your role and data..."
-              value={input}
-              onChange={handleTextareaChange}
-              onKeyDown={handleKeyPress}
-              disabled={isLoading}
-              rows={1}
-              className="flex-1 bg-transparent border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[2.5rem] max-h-[12rem] py-2"
-            />
-            <Button
-              onClick={handleSend}
-              disabled={isLoading || !input.trim()}
-              size="icon"
-              className="rounded-full flex-shrink-0 h-10 w-10"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Sticky pill input bar at bottom with visibility */}
+      <div 
+        className="fixed left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-15"
+        style={{
+          bottom: '20px',
+        }}
+      >
+        <div className="flex items-end gap-2 bg-white rounded-full border border-input px-4 py-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+          <textarea
+            ref={textareaRef}
+            placeholder="Ask me anything about your role and data..."
+            value={input}
+            onChange={handleTextareaChange}
+            onKeyDown={handleKeyPress}
+            disabled={isLoading}
+            rows={1}
+            className="flex-1 bg-transparent border-0 resize-none focus-visible:outline-none min-h-[2.5rem] py-2 px-2"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          />
+          <Button
+            onClick={handleSend}
+            disabled={isLoading || !input.trim()}
+            size="icon"
+            className="rounded-full flex-shrink-0 h-10 w-10"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
