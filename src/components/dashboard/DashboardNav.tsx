@@ -15,16 +15,16 @@ const DashboardNav = ({ onSignOut, activeView, onViewChange, role, userEmail }: 
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-card backdrop-blur supports-[backdrop-filter]:bg-card/95">
-      <div className="flex h-16 items-center gap-4 px-6">
+    <header className="sticky top-0 z-20 border-b bg-card/80 backdrop-blur-sm shadow-soft">
+      <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">CD</span>
+          <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center shadow-soft">
+            <span className="text-primary-foreground fredoka-bold text-base">CD</span>
           </div>
-          <div>
-            <h2 className="text-sm font-semibold">Corporate Dashboard</h2>
+          <div className="hidden md:block">
+            <h2 className="fredoka-semibold text-sm text-foreground">Corporate Dashboard</h2>
             {role && (
-              <p className="text-xs text-muted-foreground">
+              <p className="fredoka-regular text-xs text-muted-foreground">
                 {getRoleDisplay(role)} • {userEmail}
               </p>
             )}
@@ -34,30 +34,30 @@ const DashboardNav = ({ onSignOut, activeView, onViewChange, role, userEmail }: 
         <nav className="flex-1 flex justify-center gap-2">
           <button
             onClick={() => onViewChange("dashboard")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all fredoka-medium text-sm ${
               activeView === "dashboard"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? "bg-primary text-primary-foreground shadow-soft"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
             }`}
           >
-            <LayoutGrid className="h-4 w-4" />
-            <span className="text-sm font-medium">Dashboard</span>
+            <LayoutGrid className="w-4 h-4" />
+            <span className="hidden sm:inline">Dashboard</span>
           </button>
           <button
             onClick={() => onViewChange("ai")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all fredoka-medium text-sm ${
               activeView === "ai"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? "bg-primary text-primary-foreground shadow-soft"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
             }`}
           >
-            <Sparkles className="h-4 w-4" />
-            <span className="text-sm font-medium">AI Assistant</span>
+            <Sparkles className="w-4 h-4" />
+            <span className="hidden sm:inline">AI Assistant</span>
           </button>
         </nav>
         
-        <Button variant="ghost" onClick={onSignOut} className="gap-2 h-9">
-          <LogOut className="h-4 w-4" />
+        <Button variant="ghost" onClick={onSignOut} className="gap-2 h-9 fredoka-medium">
+          <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Sign Out</span>
         </Button>
       </div>

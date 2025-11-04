@@ -87,20 +87,23 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/5">
-      <Card className="w-full max-w-md p-8 shadow-strong">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md p-8 shadow-strong border border-border">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+          <div className="w-16 h-16 rounded-lg bg-gradient-primary flex items-center justify-center mx-auto mb-4 shadow-medium">
+            <span className="text-primary-foreground fredoka-bold text-2xl">CD</span>
+          </div>
+          <h1 className="text-3xl fredoka-bold text-foreground mb-2">
             Corporate Dashboard
           </h1>
-          <p className="text-muted-foreground">
+          <p className="fredoka-regular text-muted-foreground">
             {isLogin ? "Sign in to your account" : "Create your account"}
           </p>
         </div>
 
         <form onSubmit={handleAuth} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="fredoka-medium">Email</Label>
             <Input
               id="email"
               type="email"
@@ -108,11 +111,12 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="fredoka-regular"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="fredoka-medium">Password</Label>
             <Input
               id="password"
               type="password"
@@ -120,10 +124,11 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="fredoka-regular"
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full fredoka-semibold shadow-medium hover:shadow-strong" disabled={loading}>
             {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
           </Button>
         </form>
@@ -132,18 +137,18 @@ const Auth = () => {
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-primary hover:underline"
+            className="fredoka-medium text-sm text-primary hover:underline transition-all"
           >
             {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
           </button>
         </div>
 
-        <div className="mt-6 p-4 bg-muted rounded-lg">
-          <p className="text-xs font-semibold mb-2">First time? Sign up with these emails:</p>
-          <p className="text-xs">CEO: ceo@company.com</p>
-          <p className="text-xs">Developer: dev@company.com</p>
-          <p className="text-xs text-muted-foreground">Password: demo123 (or any 6+ chars)</p>
-          <p className="text-xs text-muted-foreground mt-2">Your role is assigned automatically based on your email!</p>
+        <div className="mt-6 p-4 bg-muted/50 border border-border rounded-lg">
+          <p className="fredoka-semibold text-xs text-foreground mb-2">First time? Sign up with these emails:</p>
+          <p className="fredoka-regular text-xs text-muted-foreground">CEO: ceo@company.com</p>
+          <p className="fredoka-regular text-xs text-muted-foreground">Developer: dev@company.com</p>
+          <p className="fredoka-regular text-xs text-muted-foreground">Password: demo123 (or any 6+ chars)</p>
+          <p className="fredoka-regular text-xs text-muted-foreground mt-2">Your role is assigned automatically based on your email!</p>
         </div>
       </Card>
     </div>

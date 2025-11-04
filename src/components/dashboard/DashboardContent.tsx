@@ -233,75 +233,56 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      <div className="animate-slide-up">
+        <h2 className="text-3xl fredoka-bold text-foreground">
           {role && getRoleWelcome(role)}
         </h2>
-        <p className="text-muted-foreground mt-1">
+        <p className="fredoka-regular text-muted-foreground mt-2">
           Welcome back, {userEmail}
         </p>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50">
+          <TabsTrigger value="overview" className="fredoka-medium">Overview</TabsTrigger>
+          <TabsTrigger value="analytics" className="fredoka-medium">Analytics</TabsTrigger>
           {(role === 'ceo' || role === 'cto') && (
             <>
-              <TabsTrigger value="companies">Companies</TabsTrigger>
-              <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              <TabsTrigger value="workflows">Workflows</TabsTrigger>
-              <TabsTrigger value="ai">AI</TabsTrigger>
+              <TabsTrigger value="companies" className="fredoka-medium">Companies</TabsTrigger>
+              <TabsTrigger value="integrations" className="fredoka-medium">Integrations</TabsTrigger>
+              <TabsTrigger value="workflows" className="fredoka-medium">Workflows</TabsTrigger>
+              <TabsTrigger value="ai" className="fredoka-medium">AI</TabsTrigger>
             </>
           )}
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TabsContent value="overview" className="space-y-4 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {metrics.map((metric, index) => {
               const Icon = metric.icon;
               return (
-                <Card key={index} className="p-6 shadow-soft hover:shadow-medium transition-shadow">
+                <Card 
+                  key={index} 
+                  className="p-6 shadow-soft hover:shadow-medium transition-all border border-border animate-slide-up"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
                   <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
-                      <p className="text-3xl font-bold">{metric.value}</p>
-                      <p className={`text-sm font-medium ${metric.color}`}>{metric.change}</p>
+                    <div className="space-y-2 flex-1">
+                      <p className="fredoka-medium text-sm text-muted-foreground">{metric.label}</p>
+                      <p className="fredoka-bold text-3xl text-foreground">{metric.value}</p>
+                      <p className={`fredoka-semibold text-sm ${metric.color}`}>{metric.change}</p>
                     </div>
-                    <div className={`p-3 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10`}>
-                      <Icon className={`h-6 w-6 ${metric.color}`} />
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-primary" />
                     </div>
                   </div>
                 </Card>
               );
             })}
           </div>
-
-          <Card className="p-6 shadow-soft">
-            <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-            <div className="space-y-4">
-              {[
-                { action: "Dashboard accessed", time: "Just now", status: "active" },
-                { action: "Report generated", time: "10 minutes ago", status: "complete" },
-                { action: "Data synced", time: "1 hour ago", status: "complete" },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
-                  <div>
-                    <p className="font-medium">{activity.action}</p>
-                    <p className="text-sm text-muted-foreground">{activity.time}</p>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    activity.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {activity.status}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
+        <TabsContent value="analytics" className="space-y-4 animate-fade-in">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <RealtimeMetricsChart
               metricType="revenue"
