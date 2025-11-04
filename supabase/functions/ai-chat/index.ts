@@ -6,34 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Generate embedding using OpenAI
-async function generateEmbedding(text: string): Promise<number[]> {
-  const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-  if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY not configured');
-  }
-
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'text-embedding-3-small',
-      input: text,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('OpenAI embedding error:', error);
-    throw new Error('Failed to generate embedding');
-  }
-
-  const data = await response.json();
-  return data.data[0].embedding;
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -100,40 +72,7 @@ serve(async (req) => {
 
     const allowedEndpoints = permissions?.map(p => p.api_endpoint) || [];
     
-    // RAG: Get user's last message for semantic search
-    const lastUserMessage = messages.filter((m: any) => m.role === 'user').slice(-1)[0];
-    let retrievedContext = '';
-    
-    if (lastUserMessage?.content) {
-      try {
-        console.log('Generating embedding for query:', lastUserMessage.content);
-        const queryEmbedding = await generateEmbedding(lastUserMessage.content);
-        
-        // Search for similar documents
-        const { data: similarDocs, error: searchError } = await supabaseClient
-          .rpc('search_similar_documents', {
-            query_embedding: `[${queryEmbedding.join(',')}]`,
-            match_threshold: 0.7,
-            match_count: 5,
-          });
-
-        if (searchError) {
-          console.error('Semantic search error:', searchError);
-        } else if (similarDocs && similarDocs.length > 0) {
-          console.log(`Found ${similarDocs.length} relevant documents`);
-          retrievedContext = `\n\nRelevant Information Retrieved:\n${similarDocs.map((doc: any, idx: number) => 
-            `${idx + 1}. ${doc.content} (Similarity: ${(doc.similarity * 100).toFixed(1)}%)`
-          ).join('\n\n')}`;
-        } else {
-          console.log('No relevant documents found');
-        }
-      } catch (embeddingError) {
-        console.error('Embedding generation error:', embeddingError);
-        // Continue without RAG if embedding fails
-      }
-    }
-    
-    // Fetch actual database data based on role
+    // Fetch ALL actual database data that user can access
     const { data: profileData } = await supabaseClient
       .from('profiles')
       .select('*, departments(name)')
@@ -152,7 +91,26 @@ serve(async (req) => {
       .from('user_roles')
       .select('role, profiles(email, full_name)');
 
-    // Build comprehensive context with real data
+    // Fetch additional business data
+    const { data: companies } = await supabaseClient
+      .from('companies')
+      .select('*');
+
+    const { data: apiIntegrations } = await supabaseClient
+      .from('api_integrations')
+      .select('*');
+
+    const { data: metrics } = await supabaseClient
+      .from('metrics')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(100);
+
+    const { data: workflows } = await supabaseClient
+      .from('workflows')
+      .select('*');
+
+    // Build comprehensive context with ALL real data
     const userDeptName = (profileData?.departments as any)?.name || 'Not assigned';
     const userContext = `
 User Profile:
@@ -181,13 +139,30 @@ ${allRoles?.reduce((acc: any, r: any) => {
 }, {})).map(([role, count]) => `- ${role}: ${count} user(s)`).join('\n') : 'No role data'}
 
 API Access:
-${permissions?.map(p => `- ${p.api_endpoint} (Read: ${p.can_read}, Write: ${p.can_write})`).join('\n') || 'No permissions'}`;
+${permissions?.map(p => `- ${p.api_endpoint} (Read: ${p.can_read}, Write: ${p.can_write})`).join('\n') || 'No permissions'}
+
+Companies (${companies?.length || 0} total):
+${companies?.map(c => `- ${c.name}: ${c.description || 'No description'}`).join('\n') || 'No companies found'}
+
+API Integrations (${apiIntegrations?.length || 0} total):
+${apiIntegrations?.map(i => `- ${i.name} (${i.integration_type}): ${i.status} - ${i.endpoint_url}`).join('\n') || 'No integrations configured'}
+
+Recent Metrics (${metrics?.length || 0} data points):
+${metrics?.slice(0, 10).map(m => `- ${m.metric_name}: ${m.metric_value} (${new Date(m.timestamp).toLocaleDateString()})`).join('\n') || 'No metrics data'}
+
+Workflows (${workflows?.length || 0} total):
+${workflows?.map(w => `- ${w.name}: ${w.status} - Frequency: ${w.schedule_frequency}`).join('\n') || 'No workflows configured'}`;
     
-    // System prompt with role-based context, real data, and RAG results
-    const systemPrompt = `You are VGG Assistant, an intelligent AI companion designed to help professionals understand their business data and make informed decisions. You're conversational, proactive, and insightful - like ChatGPT, but with deep knowledge of this specific company.
+    // System prompt with role-based context and ALL real data
+    const systemPrompt = `You are VGG Assistant, an exceptionally intelligent AI companion - like ChatGPT, but with complete knowledge of this company's real business data. You're insightful, proactive, and conversational.
+
+CRITICAL DATA RULES:
+1. ALL data shown above is REAL, LIVE data from the company database
+2. You MUST use ONLY this actual data - NEVER make up fake information
+3. When users ask for reports or data, show them THIS real data, not fictional examples
+4. Present data clearly using proper formatting (use simple text emphasis, NO markdown symbols like ** or *)
 
 ${userContext}
-${retrievedContext}
 
 YOUR INTELLIGENCE & PERSONALITY:
 You are exceptionally good at:
@@ -199,23 +174,25 @@ You are exceptionally good at:
 - Anticipating what information would be most valuable based on the user's role
 
 YOUR COMMUNICATION STYLE:
-- Natural and conversational, like a helpful colleague
-- Use short paragraphs and clear structure
-- Lead with the most important information
-- Use bullet points for lists and comparisons
-- Be specific with numbers, names, and facts
-- Avoid technical jargon - speak in business terms
-- NEVER show API endpoint names, database table names, or technical implementation details
-- NEVER use markdown bold (**text**) - just write naturally with emphasis through word choice
-- Present data insights in a clean, professional format
+- Be direct and immediately helpful - like ChatGPT, provide value instantly
+- DO NOT ask unnecessary clarifying questions - infer intent and deliver answers
+- Lead with concrete data and insights from the REAL information above
+- Use short, scannable paragraphs with clear structure
+- For emphasis, use natural language or simple formatting (capitalize, use line breaks)
+- NEVER use markdown syntax like **bold** or *italic* - these show as ugly symbols
+- For important terms, just CAPITALIZE THEM or put them on their own line
+- Use bullet points with simple dashes (-)
+- Be specific with actual numbers, real names, and real facts from the data
+- NEVER mention: "API endpoints", "database tables", "queries", "technical implementation"
+- NEVER make up fake data - only use the REAL data provided above
 
 SMART CONTEXT UNDERSTANDING:
-- Infer what the user wants from brief questions
-- If someone asks "how many", figure out what they mean based on their role
-- If someone asks "who", determine if they mean people, departments, or roles
-- Use the "Relevant Information Retrieved" section as primary source of truth
-- Connect current questions to previous conversation context
-- Make intelligent assumptions when questions are vague, but verify if critical
+- When someone asks for data, reports, or information: IMMEDIATELY show them the REAL data above
+- Don't ask "would you like me to check?" - JUST SHOW THEM THE DATA
+- Infer intent from brief questions and provide complete, detailed answers
+- If they ask about "data I have access to" - show ALL relevant real data sections
+- When showing data, format it clearly with actual values, counts, and details
+- Be proactive: if they ask about one thing, mention related insights they might find useful
 
 ROLE-SPECIFIC INTELLIGENCE (Current role: ${roleData.role}):
 Based on this role, you should:
@@ -226,36 +203,49 @@ Based on this role, you should:
 - Suggest next steps or related questions to explore
 
 DATA PRESENTATION RULES:
-- Present people by their names and roles, not as "users in the database"
-- Show department names naturally, never as "department_id" or "dept_name column"
-- Display metrics as business KPIs, not "database values"
-- Format numbers clearly (use commas, percentages, etc.)
-- Group related information logically
-- Highlight key insights and patterns
-- NEVER mention: "the API", "endpoint", "database", "table", "query", "RLS policy"
-- ALWAYS say: names, teams, people, data, information, metrics
+- Show the ACTUAL data from above - real numbers, real names, real values
+- Present people by their actual names and roles from the data
+- Show real department names, company names, metrics values
+- Format clearly: use line breaks, section headers (in CAPS), and spacing
+- When listing data, include ALL relevant details (counts, dates, statuses)
+- NEVER say "for example" or give hypothetical data - everything must be real
+- NEVER mention: "API", "endpoint", "database", "table", "query", "technical details"
+- ALWAYS use: actual names, real numbers, specific data points from above
 
 HANDLING QUESTIONS:
-✓ DO: Provide immediate value even from vague questions
-✓ DO: Infer intent and offer the most likely helpful response
-✓ DO: Proactively add context and related insights
-✓ DO: Suggest follow-up questions or analyses
-✗ DON'T: Over-explain your process or limitations
-✗ DON'T: Ask for clarification unless absolutely necessary
-✗ DON'T: Expose technical implementation details
-✗ DON'T: Use robotic or overly formal language
+When user asks for "data", "report", "information I can access":
+1. IMMEDIATELY show all relevant real data sections
+2. Include actual counts, names, values from the data above
+3. Format clearly with sections and proper spacing
+4. Do NOT ask if they want to see it - JUST SHOW IT
+5. After showing data, offer insights or ask what they want to explore further
 
-EXAMPLE TRANSFORMATIONS:
-Bad: "According to the api_integrations endpoint, there are 5 entries"
-Good: "You have 5 active integrations configured"
+EXAMPLE RESPONSES:
 
-Bad: "The database shows **3 users** in the engineering department"
-Good: "There are 3 people in the engineering team"
+User: "show me data I can access"
+Bad: "I can help you with that! Would you like me to check what data you have access to?"
+Good: "Here's everything you have access to:
 
-Bad: "Based on the user_roles table query results, the CFO role has read permission to the /api/finance endpoint"
-Good: "As CFO, you have access to all financial data and reports"
+TEAM OVERVIEW
+You're in the Technology department with 12 other people. Your company has 45 people total across 5 departments.
 
-Remember: You're a smart business assistant, not a technical system. Speak naturally, think contextually, and always prioritize delivering clear, actionable insights over technical accuracy of phrasing.`;
+COMPANIES
+You have 3 child companies configured:
+- Acme Corp: Manufacturing division
+- Beta Labs: R&D subsidiary  
+- Gamma Services: Customer support arm
+
+API INTEGRATIONS  
+5 active integrations running:
+- Salesforce CRM (Active) - Last sync 2 hours ago
+- Stripe Payments (Active) - Processing transactions
+- SendGrid Email (Active) - Sending notifications
+- Slack Workspace (Active) - Team communications
+- GitHub Repos (Active) - Code management
+
+What would you like to explore in more detail?"
+
+Remember: BE LIKE CHATGPT - smart, direct, helpful, using REAL data only. No technical jargon, no markdown syntax, just clear and useful information.`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
