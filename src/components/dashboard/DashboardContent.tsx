@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, DollarSign, Activity, Target } from "lucide-react";
+import EmbeddingsManager from "./EmbeddingsManager";
 
 interface DashboardContentProps {
   role: string | null;
@@ -235,6 +236,11 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
           Welcome back, {userEmail}
         </p>
       </div>
+
+      {/* AI Embeddings Manager for admins */}
+      {(role === 'ceo' || role === 'cto') && (
+        <EmbeddingsManager role={role} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {metrics.map((metric, index) => {

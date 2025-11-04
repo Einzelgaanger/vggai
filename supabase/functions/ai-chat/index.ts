@@ -6,6 +6,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Generate embedding using OpenAI
+async function generateEmbedding(text: string): Promise<number[]> {
+  const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY not configured');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'text-embedding-3-small',
+      input: text,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('OpenAI embedding error:', error);
+    throw new Error('Failed to generate embedding');
+  }
+
+  const data = await response.json();
+  return data.data[0].embedding;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -71,6 +100,39 @@ serve(async (req) => {
 
     const allowedEndpoints = permissions?.map(p => p.api_endpoint) || [];
     
+    // RAG: Get user's last message for semantic search
+    const lastUserMessage = messages.filter((m: any) => m.role === 'user').slice(-1)[0];
+    let retrievedContext = '';
+    
+    if (lastUserMessage?.content) {
+      try {
+        console.log('Generating embedding for query:', lastUserMessage.content);
+        const queryEmbedding = await generateEmbedding(lastUserMessage.content);
+        
+        // Search for similar documents
+        const { data: similarDocs, error: searchError } = await supabaseClient
+          .rpc('search_similar_documents', {
+            query_embedding: `[${queryEmbedding.join(',')}]`,
+            match_threshold: 0.7,
+            match_count: 5,
+          });
+
+        if (searchError) {
+          console.error('Semantic search error:', searchError);
+        } else if (similarDocs && similarDocs.length > 0) {
+          console.log(`Found ${similarDocs.length} relevant documents`);
+          retrievedContext = `\n\nRelevant Information Retrieved:\n${similarDocs.map((doc: any, idx: number) => 
+            `${idx + 1}. ${doc.content} (Similarity: ${(doc.similarity * 100).toFixed(1)}%)`
+          ).join('\n\n')}`;
+        } else {
+          console.log('No relevant documents found');
+        }
+      } catch (embeddingError) {
+        console.error('Embedding generation error:', embeddingError);
+        // Continue without RAG if embedding fails
+      }
+    }
+    
     // Fetch actual database data based on role
     const { data: profileData } = await supabaseClient
       .from('profiles')
@@ -121,26 +183,34 @@ ${allRoles?.reduce((acc: any, r: any) => {
 API Access:
 ${permissions?.map(p => `- ${p.api_endpoint} (Read: ${p.can_read}, Write: ${p.can_write})`).join('\n') || 'No permissions'}`;
     
-    // System prompt with role-based context and real data
-    const systemPrompt = `You are an AI assistant for a corporate dashboard system with access to real company data.
+    // System prompt with role-based context, real data, and RAG results
+    const systemPrompt = `You are VGG Assistant, an AI-powered assistant for a corporate dashboard system with access to real company data through semantic search.
 
 ${userContext}
+${retrievedContext}
 
 Your capabilities:
-1. Answer questions about company data, users, departments, and roles
-2. Provide insights based on the user's role and permissions
+1. Answer questions about company data, users, departments, and roles using semantic search
+2. Provide insights based on the user's role (${roleData.role}) and permissions
 3. Explain what data the user has access to
 4. Help with analytics and reporting based on available data
-5. Be professional, accurate, and helpful
+5. Use the "Relevant Information Retrieved" section above for context-aware responses
+6. Be professional, accurate, and helpful
 
 Important guidelines:
-- You have access to REAL data from the database shown above
-- Only discuss data the user has permission to access
+- You have access to REAL data from the database and semantic search results
+- Prioritize information from "Relevant Information Retrieved" as it's most relevant to the user's question
+- Only discuss data the user has permission to access based on their role
 - Be specific and use actual numbers/names from the data
+- If the retrieved information doesn't answer the question, use the general company data provided
 - If asked about data not in your context, explain what you do have access to
 - Suggest relevant insights based on the role: ${roleData.role}
 
-When the user asks about metrics or analytics, provide specific information based on the data above.`;
+When answering questions:
+1. Check the "Relevant Information Retrieved" section first
+2. Cross-reference with general company data
+3. Provide specific, accurate answers with context
+4. Explain your confidence level if uncertain`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
