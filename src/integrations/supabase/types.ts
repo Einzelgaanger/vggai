@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_integrations: {
+        Row: {
+          auth_credentials: Json | null
+          auth_type: string | null
+          company_id: string | null
+          created_at: string | null
+          endpoint_url: string
+          id: string
+          integration_name: string
+          integration_type: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          metadata: Json | null
+          sync_frequency: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auth_credentials?: Json | null
+          auth_type?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          endpoint_url: string
+          id?: string
+          integration_name: string
+          integration_type: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          sync_frequency?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auth_credentials?: Json | null
+          auth_type?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          endpoint_url?: string
+          id?: string
+          integration_name?: string
+          integration_type?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          sync_frequency?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_integrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_permissions: {
         Row: {
           api_endpoint: string
@@ -38,6 +94,42 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      companies: {
+        Row: {
+          api_endpoint: string | null
+          api_key_encrypted: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          api_key_encrypted?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -95,6 +187,47 @@ export type Database = {
         }
         Relationships: []
       }
+      metrics: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_unit: string | null
+          metric_value: number
+          recorded_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_unit?: string | null
+          metric_value: number
+          recorded_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_unit?: string | null
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -130,6 +263,39 @@ export type Database = {
           },
         ]
       }
+      resource_permissions: {
+        Row: {
+          created_at: string | null
+          granted_by: string | null
+          id: string
+          metadata: Json | null
+          permission_level: string
+          resource_id: string
+          resource_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          granted_by?: string | null
+          id?: string
+          metadata?: Json | null
+          permission_level: string
+          resource_id: string
+          resource_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          granted_by?: string | null
+          id?: string
+          metadata?: Json | null
+          permission_level?: string
+          resource_id?: string
+          resource_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -148,6 +314,54 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      workflows: {
+        Row: {
+          actions: Json
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          last_run_at: string | null
+          metadata: Json | null
+          name: string
+          next_run_at: string | null
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          metadata?: Json | null
+          name: string
+          next_run_at?: string | null
+          trigger_config: Json
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run_at?: string | null
+          metadata?: Json | null
+          name?: string
+          next_run_at?: string | null
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

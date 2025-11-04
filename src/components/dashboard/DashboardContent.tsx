@@ -1,6 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, DollarSign, Activity, Target } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmbeddingsManager from "./EmbeddingsManager";
+import RealtimeMetricsChart from "./RealtimeMetricsChart";
+import CompanyManagement from "./CompanyManagement";
+import APIIntegrationManager from "./APIIntegrationManager";
+import WorkflowAutomation from "./WorkflowAutomation";
 
 interface DashboardContentProps {
   role: string | null;
@@ -237,53 +242,114 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
         </p>
       </div>
 
-      {/* AI Embeddings Manager for admins */}
-      {(role === 'ceo' || role === 'cto') && (
-        <EmbeddingsManager role={role} />
-      )}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          {(role === 'ceo' || role === 'cto') && (
+            <>
+              <TabsTrigger value="companies">Companies</TabsTrigger>
+              <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="workflows">Workflows</TabsTrigger>
+              <TabsTrigger value="ai">AI</TabsTrigger>
+            </>
+          )}
+        </TabsList>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {metrics.map((metric, index) => {
-          const Icon = metric.icon;
-          return (
-            <Card key={index} className="p-6 shadow-soft hover:shadow-medium transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
-                  <p className="text-3xl font-bold">{metric.value}</p>
-                  <p className={`text-sm font-medium ${metric.color}`}>{metric.change}</p>
-                </div>
-                <div className={`p-3 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10`}>
-                  <Icon className={`h-6 w-6 ${metric.color}`} />
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {metrics.map((metric, index) => {
+              const Icon = metric.icon;
+              return (
+                <Card key={index} className="p-6 shadow-soft hover:shadow-medium transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+                      <p className="text-3xl font-bold">{metric.value}</p>
+                      <p className={`text-sm font-medium ${metric.color}`}>{metric.change}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10`}>
+                      <Icon className={`h-6 w-6 ${metric.color}`} />
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
 
-      <Card className="p-6 shadow-soft">
-        <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-        <div className="space-y-4">
-          {[
-            { action: "Dashboard accessed", time: "Just now", status: "active" },
-            { action: "Report generated", time: "10 minutes ago", status: "complete" },
-            { action: "Data synced", time: "1 hour ago", status: "complete" },
-          ].map((activity, index) => (
-            <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
-              <div>
-                <p className="font-medium">{activity.action}</p>
-                <p className="text-sm text-muted-foreground">{activity.time}</p>
-              </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                activity.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-              }`}>
-                {activity.status}
-              </div>
+          <Card className="p-6 shadow-soft">
+            <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
+            <div className="space-y-4">
+              {[
+                { action: "Dashboard accessed", time: "Just now", status: "active" },
+                { action: "Report generated", time: "10 minutes ago", status: "complete" },
+                { action: "Data synced", time: "1 hour ago", status: "complete" },
+              ].map((activity, index) => (
+                <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
+                  <div>
+                    <p className="font-medium">{activity.action}</p>
+                    <p className="text-sm text-muted-foreground">{activity.time}</p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    activity.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {activity.status}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </Card>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <RealtimeMetricsChart
+              metricType="revenue"
+              title="Revenue Stream"
+              description="Real-time revenue metrics"
+              chartType="area"
+            />
+            <RealtimeMetricsChart
+              metricType="users"
+              title="User Growth"
+              description="Active users in real-time"
+              chartType="line"
+            />
+            <RealtimeMetricsChart
+              metricType="performance"
+              title="System Performance"
+              description="Performance metrics"
+              chartType="line"
+            />
+            <RealtimeMetricsChart
+              metricType="engagement"
+              title="User Engagement"
+              description="Engagement metrics"
+              chartType="area"
+            />
+          </div>
+        </TabsContent>
+
+        {(role === 'ceo' || role === 'cto') && (
+          <>
+            <TabsContent value="companies">
+              <CompanyManagement role={role} />
+            </TabsContent>
+
+            <TabsContent value="integrations">
+              <APIIntegrationManager role={role} />
+            </TabsContent>
+
+            <TabsContent value="workflows">
+              <WorkflowAutomation />
+            </TabsContent>
+
+            <TabsContent value="ai">
+              <EmbeddingsManager role={role} />
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
     </div>
   );
 };
