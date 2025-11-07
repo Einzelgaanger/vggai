@@ -15,9 +15,14 @@ const Index = () => {
             </div>
             <span className="fredoka-semibold text-xl text-foreground">Corporate Dashboard</span>
           </div>
-          <Button onClick={() => navigate("/auth")} variant="outline" className="fredoka-medium">
-            Sign In
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button onClick={() => navigate("/admin")} variant="ghost" size="sm" className="fredoka-regular text-xs">
+              Admin
+            </Button>
+            <Button onClick={() => navigate("/auth")} variant="outline" className="fredoka-medium">
+              Sign In
+            </Button>
+          </div>
         </div>
       </nav>
 

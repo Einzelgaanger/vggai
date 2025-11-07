@@ -6,7 +6,6 @@ import RealtimeMetricsChart from "./RealtimeMetricsChart";
 import CompanyManagement from "./CompanyManagement";
 import APIIntegrationManager from "./APIIntegrationManager";
 import WorkflowAutomation from "./WorkflowAutomation";
-import { AdminPanel } from "./AdminPanel";
 
 interface DashboardContentProps {
   role: string | null;
@@ -244,7 +243,7 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50">
           <TabsTrigger value="overview" className="fredoka-medium">Overview</TabsTrigger>
           <TabsTrigger value="analytics" className="fredoka-medium">Analytics</TabsTrigger>
           {(role === 'ceo' || role === 'cto') && (
@@ -253,7 +252,6 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
               <TabsTrigger value="integrations" className="fredoka-medium">Integrations</TabsTrigger>
               <TabsTrigger value="workflows" className="fredoka-medium">Workflows</TabsTrigger>
               <TabsTrigger value="ai" className="fredoka-medium">AI</TabsTrigger>
-              <TabsTrigger value="admin" className="fredoka-medium">Admin</TabsTrigger>
             </>
           )}
         </TabsList>
@@ -329,10 +327,6 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
 
             <TabsContent value="ai">
               <EmbeddingsManager role={role} />
-            </TabsContent>
-
-            <TabsContent value="admin">
-              <AdminPanel />
             </TabsContent>
           </>
         )}
