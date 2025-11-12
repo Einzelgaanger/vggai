@@ -7,171 +7,235 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, User, Database, RefreshCw } from "lucide-react";
+import { Shield, User, Database, RefreshCw, X } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface UserData {
   id: string;
   email: string;
   full_name: string;
-  role: string;
+  roles: { id: string; name: string }[];
 }
 
-interface APIPermission {
+interface Role {
   id: string;
-  role: string;
-  api_endpoint: string;
-  can_read: boolean;
-  can_write: boolean;
+  name: string;
+  description: string;
 }
 
-const AVAILABLE_ROLES = [
-  'ceo', 'cto', 'cfo', 'hr_manager', 'hr_coordinator', 
-  'engineering_manager', 'senior_developer', 'junior_developer',
-  'product_manager', 'sales_manager', 'sales_representative',
-  'marketing_manager', 'marketing_specialist', 'finance_manager',
-  'accountant', 'operations_manager', 'support_manager',
-  'support_agent', 'data_analyst', 'it_administrator'
-];
+interface APIEndpoint {
+  id: string;
+  name: string;
+  endpoint_url: string;
+  method: string;
+  category: string;
+}
 
-const API_ENDPOINTS = [
-  '/companies',
-  '/api-integrations',
-  '/metrics',
-  '/workflows',
-  '/departments',
-  '/profiles',
-  '/resource-permissions'
-];
+interface RolePermission {
+  role_id: string;
+  api_endpoint_id: string;
+  has_access: boolean;
+}
 
 export function AdminPanel() {
   const [users, setUsers] = useState<UserData[]>([]);
-  const [permissions, setPermissions] = useState<APIPermission[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [endpoints, setEndpoints] = useState<APIEndpoint[]>([]);
+  const [permissions, setPermissions] = useState<RolePermission[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [selectedRole, setSelectedRole] = useState<string>("");
   const { toast } = useToast();
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedRole) {
+      fetchPermissions(selectedRole);
+    }
+  }, [selectedRole]);
+
   const fetchData = async () => {
-    setLoading(true);
     try {
-      // Fetch all users with their roles
+      setLoading(true);
+
+      // Fetch all roles
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('roles')
+        .select('*')
+        .order('name');
+
+      if (rolesError) throw rolesError;
+      setRoles(rolesData || []);
+
+      // Fetch users with their roles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, full_name');
+        .select('id, email, full_name')
+        .order('email');
 
       if (profilesError) throw profilesError;
 
-      const { data: rolesData, error: rolesError } = await supabase
+      // Fetch user roles
+      const { data: userRolesData, error: userRolesError } = await supabase
         .from('user_roles')
-        .select('user_id, role');
+        .select(`
+          user_id,
+          role_id,
+          roles (id, name)
+        `);
 
-      if (rolesError) throw rolesError;
+      if (userRolesError) throw userRolesError;
 
       // Combine users with their roles
       const usersWithRoles = profilesData?.map(profile => ({
         ...profile,
-        role: rolesData?.find(r => r.user_id === profile.id)?.role || 'No role'
+        roles: userRolesData
+          ?.filter((ur: any) => ur.user_id === profile.id)
+          .map((ur: any) => ({ id: ur.roles.id, name: ur.roles.name })) || []
       })) || [];
 
       setUsers(usersWithRoles);
 
-      // Fetch all API permissions
-      const { data: permissionsData, error: permissionsError } = await supabase
-        .from('api_permissions')
-        .select('*');
+      // Fetch API endpoints
+      const { data: endpointsData, error: endpointsError } = await supabase
+        .from('api_endpoints')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
 
-      if (permissionsError) throw permissionsError;
+      if (endpointsError) throw endpointsError;
+      setEndpoints(endpointsData || []);
 
-      setPermissions(permissionsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to load admin data",
-        variant: "destructive"
+        description: "Failed to fetch admin data",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const fetchPermissions = async (roleId: string) => {
+    const { data, error } = await supabase
+      .from('role_api_permissions')
+      .select('*')
+      .eq('role_id', roleId);
 
-  const updateUserRole = async (userId: string, newRole: string) => {
+    if (error) {
+      console.error('Error fetching permissions:', error);
+    } else {
+      setPermissions(data || []);
+    }
+  };
+
+  const updateUserRole = async (userId: string, roleId: string) => {
     try {
-      // Delete existing role
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
+      // Check if user already has this role
+      const user = users.find(u => u.id === userId);
+      if (user?.roles.some(r => r.id === roleId)) {
+        toast({
+          title: "Info",
+          description: "User already has this role",
+        });
+        return;
+      }
 
-      // Insert new role
+      // Add the new role
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: newRole as any }]);
+        .insert({ user_id: userId, role_id: roleId });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "User role updated successfully"
+        description: "Role assigned successfully",
       });
-
+      
       fetchData();
     } catch (error) {
       console.error('Error updating role:', error);
       toast({
         title: "Error",
-        description: "Failed to update user role",
-        variant: "destructive"
+        description: "Failed to assign role",
+        variant: "destructive",
       });
     }
   };
 
-  const togglePermission = async (role: string, endpoint: string, permissionType: 'can_read' | 'can_write', currentValue: boolean) => {
+  const removeUserRole = async (userId: string, roleId: string) => {
     try {
-      const existing = permissions.find(p => p.role === role && p.api_endpoint === endpoint);
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role_id', roleId);
 
-      if (existing) {
-        const { error } = await supabase
-          .from('api_permissions')
-          .update({ [permissionType]: !currentValue })
-          .eq('id', existing.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('api_permissions')
-          .insert([{
-            role: role as any,
-            api_endpoint: endpoint,
-            [permissionType]: true,
-            [permissionType === 'can_read' ? 'can_write' : 'can_read']: false
-          }]);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Permission updated successfully"
+        description: "Role removed successfully",
       });
-
+      
       fetchData();
+    } catch (error) {
+      console.error('Error removing role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove role",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const togglePermission = async (endpointId: string, currentAccess: boolean) => {
+    if (!selectedRole) return;
+
+    try {
+      const { error } = await supabase
+        .from('role_api_permissions')
+        .upsert({
+          role_id: selectedRole,
+          api_endpoint_id: endpointId,
+          has_access: !currentAccess
+        }, {
+          onConflict: 'role_id,api_endpoint_id'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Permission updated successfully",
+      });
+      
+      fetchPermissions(selectedRole);
     } catch (error) {
       console.error('Error updating permission:', error);
       toast({
         title: "Error",
         description: "Failed to update permission",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  const getRolePermissions = (role: string) => {
-    return permissions.filter(p => p.role === role);
+  const hasPermission = (endpointId: string) => {
+    return permissions.find(p => p.api_endpoint_id === endpointId)?.has_access || false;
   };
+
+  const groupedEndpoints = endpoints.reduce((acc, endpoint) => {
+    const category = endpoint.category || 'Uncategorized';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(endpoint);
+    return acc;
+  }, {} as Record<string, APIEndpoint[]>);
 
   if (loading) {
     return (
@@ -191,133 +255,155 @@ export function AdminPanel() {
         </div>
       </div>
 
-      {/* Users and Roles Section */}
-      <Card className="animate-slide-up">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 fredoka-semibold">
-            <User className="w-5 h-5" />
-            Users & Roles
-          </CardTitle>
-          <CardDescription className="fredoka-regular">View and manage user roles</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="fredoka-medium">User</TableHead>
-                <TableHead className="fredoka-medium">Email</TableHead>
-                <TableHead className="fredoka-medium">Current Role</TableHead>
-                <TableHead className="fredoka-medium">Change Role</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="fredoka-regular">{user.full_name}</TableCell>
-                  <TableCell className="fredoka-regular text-muted-foreground">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="fredoka-medium">
-                      {user.role.replace(/_/g, ' ').toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={user.role}
-                      onValueChange={(value) => updateUserRole(user.id, value)}
-                    >
-                      <SelectTrigger className="w-[200px] fredoka-regular">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {AVAILABLE_ROLES.map((role) => (
-                          <SelectItem key={role} value={role} className="fredoka-regular">
-                            {role.replace(/_/g, ' ').toUpperCase()}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="users" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="users">User Management</TabsTrigger>
+          <TabsTrigger value="permissions">API Permissions</TabsTrigger>
+        </TabsList>
 
-      {/* API Permissions Section */}
-      <Card className="animate-slide-up animation-delay-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 fredoka-semibold">
-            <Database className="w-5 h-5" />
-            API Access Permissions
-          </CardTitle>
-          <CardDescription className="fredoka-regular">
-            Configure which API endpoints each role can access
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="text-sm fredoka-medium text-foreground mb-2 block">Select Role to Configure</label>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-full max-w-md fredoka-regular">
-                <SelectValue placeholder="Choose a role..." />
-              </SelectTrigger>
-              <SelectContent>
-                {AVAILABLE_ROLES.map((role) => (
-                  <SelectItem key={role} value={role} className="fredoka-regular">
-                    {role.replace(/_/g, ' ').toUpperCase()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedRole && (
-            <div className="mt-6">
-              <h4 className="text-lg fredoka-semibold mb-4 text-foreground">
-                Permissions for {selectedRole.replace(/_/g, ' ').toUpperCase()}
-              </h4>
+        <TabsContent value="users" className="space-y-4">
+          <Card className="animate-slide-up">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 fredoka-semibold">
+                <User className="w-5 h-5" />
+                Users & Roles
+              </CardTitle>
+              <CardDescription className="fredoka-regular">
+                Manage user roles - assign and remove roles from users
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="fredoka-medium">API Endpoint</TableHead>
-                    <TableHead className="fredoka-medium text-center">Read Access</TableHead>
-                    <TableHead className="fredoka-medium text-center">Write Access</TableHead>
+                    <TableHead className="fredoka-medium">Email</TableHead>
+                    <TableHead className="fredoka-medium">Name</TableHead>
+                    <TableHead className="fredoka-medium">Roles</TableHead>
+                    <TableHead className="fredoka-medium">Assign Role</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {API_ENDPOINTS.map((endpoint) => {
-                    const permission = getRolePermissions(selectedRole).find(
-                      p => p.api_endpoint === endpoint
-                    );
-                    return (
-                      <TableRow key={endpoint}>
-                        <TableCell className="fredoka-medium">{endpoint}</TableCell>
-                        <TableCell className="text-center">
-                          <Switch
-                            checked={permission?.can_read || false}
-                            onCheckedChange={() =>
-                              togglePermission(selectedRole, endpoint, 'can_read', permission?.can_read || false)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Switch
-                            checked={permission?.can_write || false}
-                            onCheckedChange={() =>
-                              togglePermission(selectedRole, endpoint, 'can_write', permission?.can_write || false)
-                            }
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="fredoka-regular text-muted-foreground">{user.email}</TableCell>
+                      <TableCell className="fredoka-regular">{user.full_name}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2 flex-wrap">
+                          {user.roles.length > 0 ? (
+                            user.roles.map((role) => (
+                              <Badge key={role.id} variant="secondary" className="fredoka-medium capitalize">
+                                {role.name.replace(/_/g, ' ')}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-4 w-4 p-0 ml-1 hover:text-destructive"
+                                  onClick={() => removeUserRole(user.id, role.id)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No roles</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Select onValueChange={(value) => updateUserRole(user.id, value)}>
+                          <SelectTrigger className="w-[200px] fredoka-regular">
+                            <SelectValue placeholder="Select role..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roles.map((role) => (
+                              <SelectItem key={role.id} value={role.id} className="fredoka-regular capitalize">
+                                {role.name.replace(/_/g, ' ')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="permissions" className="space-y-6">
+          <Card className="animate-slide-up">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 fredoka-semibold">
+                <Database className="w-5 h-5" />
+                Role API Permissions
+              </CardTitle>
+              <CardDescription className="fredoka-regular">
+                Configure which API endpoints each role can access
+              </CardDescription>
+              <div className="mt-4">
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger className="w-full max-w-md fredoka-regular">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.id} className="fredoka-regular capitalize">
+                        {role.name.replace(/_/g, ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {selectedRole ? (
+                <div className="space-y-6">
+                  {Object.entries(groupedEndpoints).map(([category, categoryEndpoints]) => (
+                    <div key={category}>
+                      <h3 className="text-lg fredoka-semibold mb-3 capitalize text-foreground">{category}</h3>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="fredoka-medium">Endpoint Name</TableHead>
+                            <TableHead className="fredoka-medium">URL</TableHead>
+                            <TableHead className="fredoka-medium">Method</TableHead>
+                            <TableHead className="fredoka-medium text-center">Access</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {categoryEndpoints.map((endpoint) => (
+                            <TableRow key={endpoint.id}>
+                              <TableCell className="fredoka-regular">{endpoint.name}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground max-w-xs truncate fredoka-regular">
+                                {endpoint.endpoint_url}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs fredoka-medium">
+                                  {endpoint.method}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Switch
+                                  checked={hasPermission(endpoint.id)}
+                                  onCheckedChange={() => togglePermission(endpoint.id, hasPermission(endpoint.id))}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8 fredoka-regular">
+                  Select a role to manage its API permissions
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <div className="flex justify-end">
         <Button onClick={fetchData} variant="outline" className="fredoka-medium">

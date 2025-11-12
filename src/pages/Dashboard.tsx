@@ -25,15 +25,16 @@ const Dashboard = () => {
 
       setUser(session.user);
 
-      // Get user role
+      // Get user role using the new structure
       const { data: roleData } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('roles (name)')
         .eq('user_id', session.user.id)
+        .limit(1)
         .single();
 
-      if (roleData) {
-        setUserRole(roleData.role);
+      if (roleData && (roleData as any).roles) {
+        setUserRole((roleData as any).roles.name);
       }
 
       setLoading(false);

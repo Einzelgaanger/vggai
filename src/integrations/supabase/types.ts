@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_endpoints: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          endpoint_url: string
+          id: string
+          method: string
+          name: string
+          requires_auth: boolean | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          endpoint_url: string
+          id?: string
+          method?: string
+          name: string
+          requires_auth?: boolean | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          endpoint_url?: string
+          id?: string
+          method?: string
+          name?: string
+          requires_auth?: boolean | null
+        }
+        Relationships: []
+      }
       api_integrations: {
         Row: {
           auth_credentials: Json | null
@@ -296,26 +329,100 @@ export type Database = {
         }
         Relationships: []
       }
+      role_api_permissions: {
+        Row: {
+          api_endpoint_id: string
+          created_at: string | null
+          has_access: boolean | null
+          id: string
+          role_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          api_endpoint_id: string
+          created_at?: string | null
+          has_access?: boolean | null
+          id?: string
+          role_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          api_endpoint_id?: string
+          created_at?: string | null
+          has_access?: boolean | null
+          id?: string
+          role_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_api_permissions_api_endpoint_id_fkey"
+            columns: ["api_endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "api_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_api_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          role_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workflows: {
         Row: {
@@ -370,9 +477,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_api_access: {
+        Args: { user_id: string }
+        Returns: {
+          category: string
+          endpoint_id: string
+          endpoint_name: string
+          endpoint_url: string
+          method: string
+          requires_auth: boolean
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_user_roles: {
+        Args: { user_id: string }
+        Returns: {
+          role_description: string
+          role_id: string
+          role_name: string
+        }[]
       }
       has_role: {
         Args: {
@@ -381,6 +507,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { user_id: string }; Returns: boolean }
       search_similar_documents: {
         Args: {
           filter_metadata?: Json
