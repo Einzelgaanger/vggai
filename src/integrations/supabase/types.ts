@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_credentials: {
+        Row: {
+          api_endpoint: string
+          auth_type: string
+          created_at: string | null
+          credential_name: string
+          credentials: Json
+          id: string
+          is_active: boolean | null
+          last_tested_at: string | null
+          role_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          api_endpoint: string
+          auth_type: string
+          created_at?: string | null
+          credential_name: string
+          credentials: Json
+          id?: string
+          is_active?: boolean | null
+          last_tested_at?: string | null
+          role_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          api_endpoint?: string
+          auth_type?: string
+          created_at?: string | null
+          credential_name?: string
+          credentials?: Json
+          id?: string
+          is_active?: boolean | null
+          last_tested_at?: string | null
+          role_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_credentials_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_endpoints: {
         Row: {
           category: string | null
@@ -486,6 +533,17 @@ export type Database = {
           endpoint_url: string
           method: string
           requires_auth: boolean
+        }[]
+      }
+      get_user_api_credentials: {
+        Args: { user_id: string }
+        Returns: {
+          api_endpoint: string
+          auth_type: string
+          credential_id: string
+          credential_name: string
+          credentials: Json
+          is_active: boolean
         }[]
       }
       get_user_role: {
