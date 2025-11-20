@@ -10,9 +10,11 @@ import WorkflowAutomation from "./WorkflowAutomation";
 interface DashboardContentProps {
   role: string | null;
   userEmail: string;
+  selectedCompanyId?: string | null;
+  onCompanySelect?: (companyId: string) => void;
 }
 
-const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
+const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect }: DashboardContentProps) => {
   const getAnalyticsForRole = (role: string | null) => {
     switch (role) {
       case "ceo":
@@ -314,7 +316,11 @@ const DashboardContent = ({ role, userEmail }: DashboardContentProps) => {
         {(role === 'ceo' || role === 'cto') && (
           <>
             <TabsContent value="companies">
-              <CompanyManagement role={role} />
+              <CompanyManagement 
+                role={role} 
+                onCompanySelect={onCompanySelect}
+                selectedCompanyId={selectedCompanyId}
+              />
             </TabsContent>
 
             <TabsContent value="integrations">

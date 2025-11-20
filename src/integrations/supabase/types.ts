@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           api_endpoint: string
           auth_type: string
+          company_id: string | null
           created_at: string | null
           credential_name: string
           credentials: Json
@@ -30,6 +31,7 @@ export type Database = {
         Insert: {
           api_endpoint: string
           auth_type: string
+          company_id?: string | null
           created_at?: string | null
           credential_name: string
           credentials: Json
@@ -42,6 +44,7 @@ export type Database = {
         Update: {
           api_endpoint?: string
           auth_type?: string
+          company_id?: string | null
           created_at?: string | null
           credential_name?: string
           credentials?: Json
@@ -52,6 +55,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "api_credentials_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "api_credentials_role_id_fkey"
             columns: ["role_id"]
@@ -64,6 +74,7 @@ export type Database = {
       api_endpoints: {
         Row: {
           category: string | null
+          company_id: string | null
           created_at: string | null
           description: string | null
           endpoint_url: string
@@ -74,6 +85,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          company_id?: string | null
           created_at?: string | null
           description?: string | null
           endpoint_url: string
@@ -84,6 +96,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          company_id?: string | null
           created_at?: string | null
           description?: string | null
           endpoint_url?: string
@@ -92,7 +105,15 @@ export type Database = {
           name?: string
           requires_auth?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "api_endpoints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       api_integrations: {
         Row: {
@@ -379,6 +400,7 @@ export type Database = {
       role_api_permissions: {
         Row: {
           api_endpoint_id: string
+          company_id: string | null
           created_at: string | null
           has_access: boolean | null
           id: string
@@ -387,6 +409,7 @@ export type Database = {
         }
         Insert: {
           api_endpoint_id: string
+          company_id?: string | null
           created_at?: string | null
           has_access?: boolean | null
           id?: string
@@ -395,6 +418,7 @@ export type Database = {
         }
         Update: {
           api_endpoint_id?: string
+          company_id?: string | null
           created_at?: string | null
           has_access?: boolean | null
           id?: string
@@ -407,6 +431,13 @@ export type Database = {
             columns: ["api_endpoint_id"]
             isOneToOne: false
             referencedRelation: "api_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_api_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
@@ -441,6 +472,48 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_company_access: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          role_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          role_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          role_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_company_access_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_company_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -524,26 +597,63 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_api_access: {
-        Args: { user_id: string }
+      get_user_api_access:
+        | {
+            Args: { p_company_id?: string; p_user_id: string }
+            Returns: {
+              category: string
+              company_id: string
+              endpoint_id: string
+              endpoint_name: string
+              endpoint_url: string
+              method: string
+              requires_auth: boolean
+            }[]
+          }
+        | {
+            Args: { user_id: string }
+            Returns: {
+              category: string
+              endpoint_id: string
+              endpoint_name: string
+              endpoint_url: string
+              method: string
+              requires_auth: boolean
+            }[]
+          }
+      get_user_api_credentials:
+        | {
+            Args: { p_company_id?: string; p_user_id: string }
+            Returns: {
+              api_endpoint: string
+              auth_type: string
+              company_id: string
+              credential_id: string
+              credential_name: string
+              credentials: Json
+              is_active: boolean
+            }[]
+          }
+        | {
+            Args: { user_id: string }
+            Returns: {
+              api_endpoint: string
+              auth_type: string
+              credential_id: string
+              credential_name: string
+              credentials: Json
+              is_active: boolean
+            }[]
+          }
+      get_user_companies: {
+        Args: { p_user_id: string }
         Returns: {
-          category: string
-          endpoint_id: string
-          endpoint_name: string
-          endpoint_url: string
-          method: string
-          requires_auth: boolean
-        }[]
-      }
-      get_user_api_credentials: {
-        Args: { user_id: string }
-        Returns: {
-          api_endpoint: string
-          auth_type: string
-          credential_id: string
-          credential_name: string
-          credentials: Json
-          is_active: boolean
+          company_description: string
+          company_id: string
+          company_name: string
+          role_description: string
+          role_id: string
+          role_name: string
         }[]
       }
       get_user_role: {

@@ -13,9 +13,10 @@ interface Message {
 interface AIAssistantProps {
   role: string | null;
   userEmail: string;
+  selectedCompanyId?: string | null;
 }
 
-const AIAssistant = ({ role, userEmail }: AIAssistantProps) => {
+const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
