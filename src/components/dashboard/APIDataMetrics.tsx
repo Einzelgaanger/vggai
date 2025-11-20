@@ -62,35 +62,35 @@ const APIDataMetrics = ({ role, userEmail, childCompany = 'Seamless HR' }: APIDa
   const getMetricDefinitions = (role: string | null): Omit<Metric, 'value' | 'change'>[] => {
     const roleMetrics: Record<string, Omit<Metric, 'value' | 'change'>[]> = {
       ceo: [
-        { label: "Total Employees", icon: Users, color: "text-blue-600" },
-        { label: "Active Employees", icon: Users, color: "text-green-600" },
-        { label: "Departments", icon: Target, color: "text-purple-600" },
-        { label: "Open Positions", icon: Activity, color: "text-orange-600" },
+        { label: "Total Employees", icon: Users, color: "text-primary" },
+        { label: "Active Employees", icon: Users, color: "text-success" },
+        { label: "Departments", icon: Target, color: "text-accent" },
+        { label: "Open Positions", icon: Activity, color: "text-secondary" },
       ],
       cto: [
-        { label: "Total Employees", icon: Users, color: "text-blue-600" },
-        { label: "Active Employees", icon: Users, color: "text-green-600" },
-        { label: "Departments", icon: Target, color: "text-purple-600" },
+        { label: "Total Employees", icon: Users, color: "text-primary" },
+        { label: "Active Employees", icon: Users, color: "text-success" },
+        { label: "Departments", icon: Target, color: "text-accent" },
       ],
       hr_manager: [
-        { label: "Total Employees", icon: Users, color: "text-green-600" },
-        { label: "Active Employees", icon: Users, color: "text-blue-600" },
-        { label: "Departments", icon: Target, color: "text-purple-600" },
-        { label: "Open Positions", icon: Activity, color: "text-orange-600" },
+        { label: "Total Employees", icon: Users, color: "text-success" },
+        { label: "Active Employees", icon: Users, color: "text-primary" },
+        { label: "Departments", icon: Target, color: "text-accent" },
+        { label: "Open Positions", icon: Activity, color: "text-secondary" },
       ],
       cfo: [
-        { label: "Total Employees", icon: Users, color: "text-blue-600" },
-        { label: "Active Employees", icon: Users, color: "text-green-600" },
+        { label: "Total Employees", icon: Users, color: "text-primary" },
+        { label: "Active Employees", icon: Users, color: "text-success" },
       ],
       data_analyst: [
-        { label: "Total Employees", icon: Users, color: "text-blue-600" },
-        { label: "Departments", icon: Target, color: "text-purple-600" },
+        { label: "Total Employees", icon: Users, color: "text-primary" },
+        { label: "Departments", icon: Target, color: "text-accent" },
       ],
     };
 
     return roleMetrics[role || ''] || [
-      { label: "Total Employees", icon: Users, color: "text-blue-600" },
-      { label: "Active Employees", icon: Users, color: "text-green-600" },
+      { label: "Total Employees", icon: Users, color: "text-primary" },
+      { label: "Active Employees", icon: Users, color: "text-success" },
     ];
   };
 
@@ -114,11 +114,12 @@ const APIDataMetrics = ({ role, userEmail, childCompany = 'Seamless HR' }: APIDa
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="p-6">
-            <Skeleton className="h-4 w-24 mb-2" />
-            <Skeleton className="h-8 w-32 mb-2" />
+          <Card key={i} className="p-6 border-2">
+            <Skeleton className="h-12 w-12 rounded-xl mb-4" />
+            <Skeleton className="h-4 w-28 mb-2" />
+            <Skeleton className="h-8 w-20 mb-2" />
             <Skeleton className="h-4 w-16" />
           </Card>
         ))}
@@ -128,29 +129,38 @@ const APIDataMetrics = ({ role, userEmail, childCompany = 'Seamless HR' }: APIDa
 
   if (metrics.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p>No metrics available for {childCompany}</p>
+      <div className="text-center py-12 px-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-muted mb-4">
+          <Users className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <p className="text-lg font-semibold text-foreground mb-2">No metrics available</p>
+        <p className="text-sm text-muted-foreground">Waiting for data from {childCompany}</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((metric, index) => {
         const Icon = metric.icon;
         return (
           <Card 
             key={index} 
-            className="p-6 hover:shadow-lg transition-all"
+            className="group hover-lift bg-gradient-to-br from-card to-primary/5 border-2 border-border hover:border-primary/30 transition-all"
+            style={{ animationDelay: `${index * 0.05}s` }}
           >
-            <div className="flex items-start justify-between">
-              <div className="space-y-2 flex-1">
-                <p className="text-sm text-muted-foreground">{metric.label}</p>
-                <p className="text-3xl font-bold">{metric.value}</p>
-                <p className={`text-sm ${metric.color}`}>{metric.change}</p>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Icon className="w-6 h-6 text-primary" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+                <p className="text-3xl font-bold text-foreground tracking-tight">{metric.value}</p>
+                <p className={`text-sm font-semibold ${metric.color}`}>
+                  {metric.change}
+                </p>
               </div>
             </div>
           </Card>

@@ -14,25 +14,32 @@ export const ChildCompanySelector = ({
   accessibleCompanies 
 }: ChildCompanySelectorProps) => {
   return (
-    <div className="mb-6 p-4 bg-card border rounded-lg">
-      <Label className="text-sm font-medium mb-2 flex items-center gap-2">
-        <Building2 className="h-4 w-4" />
-        Select Child Company to View
+    <div className="mb-6 p-5 bg-gradient-to-br from-card via-card to-primary/5 border-2 border-border rounded-xl shadow-md">
+      <Label className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <Building2 className="h-5 w-5 text-primary" />
+        Child Company Data View
       </Label>
       <Select value={selectedCompany} onValueChange={onCompanyChange}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full h-11 bg-background border-2 hover:border-primary/50 transition-colors">
           <SelectValue placeholder="Choose a child company" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-popover border-2">
           {accessibleCompanies.map((company) => (
-            <SelectItem key={company} value={company}>
-              {company} {company === 'Seamless HR' ? '(Live API)' : '(Mock Data)'}
+            <SelectItem key={company} value={company} className="cursor-pointer">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <span className="font-medium">{company}</span>
+                <span className={`text-xs ml-auto ${company === 'Seamless HR' ? 'text-success' : 'text-secondary'}`}>
+                  {company === 'Seamless HR' ? '(Live API)' : '(Mock)'}
+                </span>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <p className="text-xs text-muted-foreground mt-2">
-        You are viewing data from <strong>{selectedCompany}</strong>
+      <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+        Currently viewing: <strong className="text-foreground">{selectedCompany}</strong>
       </p>
     </div>
   );
