@@ -70,7 +70,7 @@ const Auth = () => {
           <div className="mb-8 p-4 bg-primary/5 rounded-xl border border-primary/10">
             <p className="text-sm text-foreground/80 text-center">
               <span className="font-semibold text-primary">VGG Holdings</span> employees • Access to child companies:
-              <span className="block mt-2 flex items-center justify-center gap-3 flex-wrap">
+              <span className="block mt-3 flex items-center justify-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-success/10 text-success rounded-full text-xs font-medium">
                   <span className="w-2 h-2 bg-success rounded-full"></span>
                   Seamless HR (Live)
@@ -78,6 +78,22 @@ const Auth = () => {
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">
                   <span className="w-2 h-2 bg-secondary rounded-full"></span>
                   Kleva HR (Mock)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                  WorkflowHR (Mock)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                  PayStackHR (Mock)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                  TalentHub (Mock)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                  PeopleCore (Mock)
                 </span>
               </span>
             </p>

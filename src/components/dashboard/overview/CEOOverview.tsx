@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Users, TrendingUp, DollarSign, Calendar, Building2, UserCheck, Clock, Award } from "lucide-react";
+import { Users, TrendingUp, DollarSign, Calendar, Building2, UserCheck, Clock, Award, Star, Briefcase } from "lucide-react";
 import { getSeamlessHREmployees } from "@/lib/seamlesshr-service";
+import { getCompanyMockData } from "@/lib/enhanced-mock-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
@@ -113,42 +114,130 @@ const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
 
         setMetrics(metricsData);
       } else {
-        // Kleva HR - Mock data
-        const mockMetrics: MetricCard[] = [
-          {
-            title: "Total Workforce",
-            value: 245,
-            change: "+12.3%",
-            icon: Users,
-            trend: "up",
-            description: "Active employees"
-          },
-          {
-            title: "Revenue Growth",
-            value: "₦45.2M",
-            change: "+18.5%",
-            icon: TrendingUp,
-            trend: "up",
-            description: "This quarter"
-          },
-          {
-            title: "Operating Margin",
-            value: "32.4%",
-            change: "+2.1%",
-            icon: DollarSign,
-            trend: "up",
-            description: "Profit margin"
-          },
-          {
-            title: "Customer Retention",
-            value: "94.5%",
-            change: "+1.2%",
-            icon: Award,
-            trend: "up",
-            description: "Year over year"
-          }
-        ];
-        setMetrics(mockMetrics);
+        // Use enhanced mock data for other companies
+        const mockData = getCompanyMockData(childCompany);
+        
+        if (mockData) {
+          const { metrics, performance } = mockData;
+          
+          const metricsData: MetricCard[] = [
+            {
+              title: "Total Employees",
+              value: metrics.totalEmployees,
+              change: "+8%",
+              icon: Users,
+              trend: "up",
+              description: "Active workforce across all locations"
+            },
+            {
+              title: "Active Employees",
+              value: metrics.activeEmployees,
+              change: "+5%",
+              icon: UserCheck,
+              trend: "up",
+              description: "Currently active staff members"
+            },
+            {
+              title: "Departments",
+              value: metrics.departments,
+              icon: Building2,
+              description: "Active departments"
+            },
+            {
+              title: "Locations",
+              value: metrics.branches,
+              icon: Building2,
+              description: "Office locations"
+            },
+            {
+              title: "Avg. Tenure",
+              value: `${metrics.avgTenure} yrs`,
+              icon: Calendar,
+              description: "Average employee tenure"
+            },
+            {
+              title: "Gender Ratio",
+              value: `${Math.round((metrics.maleCount / metrics.totalEmployees) * 100)}:${Math.round((metrics.femaleCount / metrics.totalEmployees) * 100)}`,
+              icon: Users,
+              description: "Male to Female ratio"
+            },
+            {
+              title: "Performance Score",
+              value: performance.avgPerformanceScore.toFixed(1),
+              change: "+0.2",
+              icon: Star,
+              trend: "up",
+              description: "Average performance rating"
+            },
+            {
+              title: "Revenue/Employee",
+              value: `$${(performance.revenuePerEmployee! / 1000).toFixed(0)}K`,
+              change: "+12%",
+              icon: DollarSign,
+              trend: "up",
+              description: "Revenue per employee"
+            },
+            {
+              title: "Full-time Staff",
+              value: metrics.fullTimeCount,
+              icon: Briefcase,
+              description: "Full-time employees"
+            },
+            {
+              title: "Contract Staff",
+              value: metrics.contractCount,
+              icon: Clock,
+              description: "Contract employees"
+            },
+            {
+              title: "Customer Satisfaction",
+              value: `${performance.customerSatisfaction}%`,
+              change: "+3%",
+              icon: Award,
+              trend: "up",
+              description: "Customer satisfaction score"
+            }
+          ];
+          
+          setMetrics(metricsData);
+        } else {
+          // Fallback generic mock data
+          const mockMetrics: MetricCard[] = [
+            {
+              title: "Total Workforce",
+              value: 245,
+              change: "+12.3%",
+              icon: Users,
+              trend: "up",
+              description: "Active employees"
+            },
+            {
+              title: "Revenue Growth",
+              value: "₦45.2M",
+              change: "+18.5%",
+              icon: TrendingUp,
+              trend: "up",
+              description: "This quarter"
+            },
+            {
+              title: "Operating Margin",
+              value: "32.4%",
+              change: "+2.1%",
+              icon: DollarSign,
+              trend: "up",
+              description: "Profit margin"
+            },
+            {
+              title: "Customer Retention",
+              value: "94.5%",
+              change: "+1.2%",
+              icon: Award,
+              trend: "up",
+              description: "Year over year"
+            }
+          ];
+          setMetrics(mockMetrics);
+        }
       }
     } catch (error) {
       console.error('Failed to load CEO metrics:', error);
