@@ -84,7 +84,7 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 animate-fade-in">
-          <APIDataMetrics role={role} userEmail={userEmail} />
+          <APIDataMetrics role={role} userEmail={userEmail} childCompany={selectedChildCompany} />
         </TabsContent>
 
         <TabsContent value="ai" className="space-y-4 animate-fade-in">
