@@ -130,7 +130,7 @@ serve(async (req) => {
       }
     }
 
-    // Anonymous or fallback path
+    // Anonymous or fallback path - fetch data based on selected company
     if (!user) {
       console.log("Using anonymous/guest context");
       const fallbackEmail = typeof userEmail === "string" && userEmail.length > 0
@@ -146,6 +146,42 @@ serve(async (req) => {
       dataContext.user_info.roles = roles;
       
       console.log("Guest user:", { email: fallbackEmail, role: fallbackRole });
+
+      // Fetch data from SeamlessHR if selected
+      if (selectedCompanyId === "Seamless HR") {
+        console.log("Fetching SeamlessHR employee data for demo user...");
+        try {
+          const seamlessResponse = await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/seamlesshr-api`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ endpoint: "/v1/employees" }),
+            }
+          );
+
+          if (seamlessResponse.ok) {
+            const seamlessData = await seamlessResponse.json();
+            console.log(`Fetched ${seamlessData?.length || 0} employees from SeamlessHR`);
+            
+            if (!dataContext.data["HR"]) {
+              dataContext.data["HR"] = {};
+            }
+            dataContext.data["HR"]["employees"] = seamlessData;
+            
+            // Add accessible endpoint info
+            dataContext.accessible_endpoints.push({
+              name: "Employees",
+              category: "HR",
+              method: "GET",
+            });
+          } else {
+            console.error("Failed to fetch SeamlessHR data:", await seamlessResponse.text());
+          }
+        } catch (error) {
+          console.error("Error fetching SeamlessHR data:", error);
+        }
+      }
     }
 
     console.log("Building AI prompt with context:", {
