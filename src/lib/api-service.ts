@@ -1,16 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 interface APICredential {
   credential_name: string;
   api_endpoint: string;
   auth_type: string;
-  credentials: {
-    bearer_token?: string;
-    api_key?: string;
-    api_secret?: string;
-    client_id?: string;
-    client_secret?: string;
-  };
+  credentials: Json;
+  is_active: boolean;
+}
+
+interface CredentialData {
+  bearer_token?: string;
+  api_key?: string;
+  api_secret?: string;
+  client_id?: string;
+  client_secret?: string;
 }
 
 interface APIEndpoint {
@@ -71,23 +75,26 @@ export async function fetchAPIData(userId: string, endpointName?: string) {
         'Content-Type': 'application/json',
       };
 
+      // Cast credentials to CredentialData
+      const creds = credential.credentials as CredentialData;
+
       // Apply authentication
-      if (credential.auth_type === 'bearer' && credential.credentials.bearer_token) {
-        headers['Authorization'] = `Bearer ${credential.credentials.bearer_token}`;
+      if (credential.auth_type === 'bearer' && creds.bearer_token) {
+        headers['Authorization'] = `Bearer ${creds.bearer_token}`;
       } else if (credential.auth_type === 'api_key') {
-        if (credential.credentials.api_key) {
-          headers['X-API-Key'] = credential.credentials.api_key;
+        if (creds.api_key) {
+          headers['X-API-Key'] = creds.api_key;
         }
-        if (credential.credentials.api_secret) {
-          headers['X-API-Secret'] = credential.credentials.api_secret;
+        if (creds.api_secret) {
+          headers['X-API-Secret'] = creds.api_secret;
         }
       } else if (credential.auth_type === 'client_credentials' || credential.auth_type === 'seamlesshr') {
         // SeamlessHR uses x-client-id and x-client-secret headers
-        if (credential.credentials.client_id) {
-          headers['x-client-id'] = credential.credentials.client_id;
+        if (creds.client_id) {
+          headers['x-client-id'] = creds.client_id;
         }
-        if (credential.credentials.client_secret) {
-          headers['x-client-secret'] = credential.credentials.client_secret;
+        if (creds.client_secret) {
+          headers['x-client-secret'] = creds.client_secret;
         }
       }
 
