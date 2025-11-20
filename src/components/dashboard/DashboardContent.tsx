@@ -1,23 +1,29 @@
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChildCompanySelector } from "./ChildCompanySelector";
 import EmbeddingsManager from "./EmbeddingsManager";
 import RealtimeMetricsChart from "./RealtimeMetricsChart";
 import CompanyManagement from "./CompanyManagement";
 import APIIntegrationManager from "./APIIntegrationManager";
-import APICredentialManager from "./APICredentialManager";
+import { APICredentialManager } from "./APICredentialManager";
 import RoleAPIAccessManager from "./RoleAPIAccessManager";
 import WorkflowAutomation from "./WorkflowAutomation";
 import APIDataMetrics from "./APIDataMetrics";
+import AIAssistant from "./AIAssistant";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, BarChart3, Brain, Building2, Plug, GitBranch } from "lucide-react";
 
 interface DashboardContentProps {
   role: string | null;
   userEmail: string;
-  selectedCompanyId?: string | null;
-  onCompanySelect?: (companyId: string) => void;
+  fullName: string;
+  accessibleCompanies: string[];
 }
 
-const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect }: DashboardContentProps) => {
-  // All metrics are now fetched from APIs via APIDataMetrics component
-  // No hardcoded data - everything comes from real API endpoints
+const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: DashboardContentProps) => {
+  const [selectedChildCompany, setSelectedChildCompany] = useState<string>(
+    accessibleCompanies[0] || 'Seamless HR'
+  );
 
   const getRoleWelcome = (role: string | null) => {
     const roleNames: Record<string, string> = {
@@ -45,85 +51,156 @@ const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect 
     return role ? roleNames[role] || "Your Dashboard" : "Your Dashboard";
   };
 
+  const getRoleIcon = (role: string | null) => {
+    if (!role) return TrendingUp;
+    if (['ceo', 'cto', 'cfo'].includes(role)) return TrendingUp;
+    if (role.includes('manager')) return BarChart3;
+    if (role.includes('developer') || role.includes('engineer')) return Brain;
+    return BarChart3;
+  };
+
+  const RoleIcon = getRoleIcon(role);
+
   return (
     <div className="space-y-6">
+      {/* Welcome Header */}
       <div className="animate-slide-up">
-        <h2 className="text-3xl fredoka-bold text-foreground">
-          {role && getRoleWelcome(role)}
-        </h2>
-        <p className="fredoka-regular text-muted-foreground mt-2">
-          Welcome back, {userEmail}
-        </p>
+        <div className="flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <RoleIcon className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">
+                  {role && getRoleWelcome(role)}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Welcome back, <span className="font-medium text-foreground">{fullName}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+            VGG Holdings
+          </Badge>
+        </div>
       </div>
 
+      {/* Child Company Selector */}
+      <ChildCompanySelector 
+        selectedCompany={selectedChildCompany}
+        onCompanyChange={setSelectedChildCompany}
+        accessibleCompanies={accessibleCompanies}
+      />
+
+      {/* Main Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50">
-          <TabsTrigger value="overview" className="fredoka-medium">Overview</TabsTrigger>
-          <TabsTrigger value="analytics" className="fredoka-medium">Analytics</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50 p-1.5 h-auto gap-1">
+          <TabsTrigger 
+            value="overview" 
+            className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span className="hidden sm:inline">Overview</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="analytics"
+            className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span className="hidden sm:inline">Analytics</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="ai"
+            className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+          >
+            <Brain className="w-4 h-4" />
+            <span className="hidden sm:inline">AI Assistant</span>
+          </TabsTrigger>
           {(role === 'ceo' || role === 'cto') && (
             <>
-              <TabsTrigger value="companies" className="fredoka-medium">Companies</TabsTrigger>
-              <TabsTrigger value="integrations" className="fredoka-medium">Integrations</TabsTrigger>
-              <TabsTrigger value="workflows" className="fredoka-medium">Workflows</TabsTrigger>
-              <TabsTrigger value="ai" className="fredoka-medium">AI</TabsTrigger>
+              <TabsTrigger 
+                value="companies"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+              >
+                <Building2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Companies</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="integrations"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+              >
+                <Plug className="w-4 h-4" />
+                <span className="hidden sm:inline">Integrations</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="workflows"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+              >
+                <GitBranch className="w-4 h-4" />
+                <span className="hidden sm:inline">Workflows</span>
+              </TabsTrigger>
             </>
           )}
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4 animate-fade-in">
-          <APIDataMetrics role={role} userEmail={userEmail} />
-        </TabsContent>
+        <div className="mt-6">
+          <TabsContent value="overview" className="space-y-6 animate-fade-in mt-0">
+            <APIDataMetrics role={role} userEmail={userEmail} childCompany={selectedChildCompany} />
+          </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4 animate-fade-in">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <RealtimeMetricsChart
-              metricType="revenue"
-              title="Revenue Stream"
-              description="Real-time revenue metrics"
-              chartType="area"
-            />
-            <RealtimeMetricsChart
-              metricType="users"
-              title="User Growth"
-              description="Active users in real-time"
-              chartType="line"
-            />
-            <RealtimeMetricsChart
-              metricType="performance"
-              title="System Performance"
-              description="Performance metrics"
-              chartType="line"
-            />
-            <RealtimeMetricsChart
-              metricType="engagement"
-              title="User Engagement"
-              description="Engagement metrics"
-              chartType="area"
-            />
-          </div>
-        </TabsContent>
+          <TabsContent value="ai" className="space-y-6 animate-fade-in mt-0">
+            <AIAssistant role={role} userEmail={userEmail} selectedCompanyId={selectedChildCompany} />
+          </TabsContent>
 
-        {(role === 'ceo' || role === 'cto') && (
-          <>
-            <TabsContent value="companies">
-              <CompanyManagement role={role} />
-            </TabsContent>
+          <TabsContent value="analytics" className="space-y-6 animate-fade-in mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RealtimeMetricsChart
+                metricType="revenue"
+                title="Revenue Stream"
+                description="Real-time revenue metrics"
+                chartType="area"
+              />
+              <RealtimeMetricsChart
+                metricType="users"
+                title="User Growth"
+                description="Active users in real-time"
+                chartType="line"
+              />
+              <RealtimeMetricsChart
+                metricType="performance"
+                title="System Performance"
+                description="Performance metrics"
+                chartType="line"
+              />
+              <RealtimeMetricsChart
+                metricType="engagement"
+                title="User Engagement"
+                description="Engagement metrics"
+                chartType="area"
+              />
+            </div>
+          </TabsContent>
 
-            <TabsContent value="integrations" className="space-y-4">
-              <APIIntegrationManager role={role} />
-              <APICredentialManager role={role} />
-              <RoleAPIAccessManager role={role} />
-            </TabsContent>
+          {(role === 'ceo' || role === 'cto') && (
+            <>
+              <TabsContent value="companies" className="space-y-6 animate-fade-in mt-0">
+                <CompanyManagement role={role} />
+              </TabsContent>
 
-            <TabsContent value="workflows">
-              <WorkflowAutomation />
-            </TabsContent>
+              <TabsContent value="integrations" className="space-y-6 animate-fade-in mt-0">
+                <APIIntegrationManager role={role} />
+                <APICredentialManager />
+                <RoleAPIAccessManager role={role} />
+              </TabsContent>
 
-            <TabsContent value="ai">
-              <EmbeddingsManager role={role} />
-            </TabsContent>
-          </>
-        )}
+              <TabsContent value="workflows" className="space-y-6 animate-fade-in mt-0">
+                <WorkflowAutomation />
+              </TabsContent>
+            </>
+          )}
+        </div>
       </Tabs>
     </div>
   );
