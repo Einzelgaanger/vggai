@@ -46,58 +46,79 @@ const Auth = () => {
   const filteredUsers = DEMO_USERS;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
-      <Card className="w-full max-w-4xl">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <img 
-              src={vggLogo} 
-              alt="VGG Logo" 
-              className="h-16 w-16 object-contain rounded-lg"
-            />
+    <div className="min-h-screen gradient-hero flex items-center justify-center p-4">
+      <Card className="w-full max-w-5xl shadow-xl border-0">
+        <CardHeader className="space-y-4 pb-8">
+          <div className="flex items-center justify-center mb-2">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+              <img 
+                src={vggLogo} 
+                alt="VGG Logo" 
+                className="h-20 w-20 object-contain rounded-2xl relative z-10 shadow-lg"
+              />
+            </div>
           </div>
-          <CardTitle className="text-2xl text-center">
-            Demo Login
+          <CardTitle className="text-3xl text-center font-bold tracking-tight">
+            VGG Holdings Portal
           </CardTitle>
-          <CardDescription className="text-center">
-            All users are VGG Holdings employees<br />
+          <CardDescription className="text-center text-base px-4">
             Select your role to access child company data
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4 p-3 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <strong>VGG Holdings</strong> employees can access data from child companies:
-              <span className="block mt-1 text-primary font-medium">
-                • Seamless HR (Live API) • Kleva HR (Mock Data)
+        <CardContent className="px-8 pb-8">
+          <div className="mb-8 p-4 bg-primary/5 rounded-xl border border-primary/10">
+            <p className="text-sm text-foreground/80 text-center">
+              <span className="font-semibold text-primary">VGG Holdings</span> employees • Access to child companies:
+              <span className="block mt-2 flex items-center justify-center gap-3 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-success/10 text-success rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-success rounded-full"></span>
+                  Seamless HR (Live)
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                  Kleva HR (Mock)
+                </span>
               </span>
             </p>
           </div>
 
-          {/* User Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto">
-            {filteredUsers.map((user) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[55vh] overflow-y-auto pr-2">
+            {filteredUsers.map((user, index) => (
               <Card 
                 key={user.email}
-                className="cursor-pointer hover:border-primary transition-colors"
+                className="group cursor-pointer hover-lift border transition-all duration-300 hover:border-primary/50 hover:bg-primary/5"
                 onClick={() => handleRoleSelect(user)}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                      <User className="h-5 w-5 text-primary" />
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-gradient-to-br from-primary to-accent p-3 rounded-xl group-hover:scale-110 transition-transform">
+                      <User className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm truncate">
+                      <h3 className="font-semibold text-base mb-1 truncate">
                         {user.fullName}
                       </h3>
-                      <p className="text-xs text-muted-foreground mb-1">
+                      <p className="text-sm text-muted-foreground mb-2">
                         {user.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                       </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Building2 className="h-3 w-3" />
-                        {user.company}
-                      </p>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Building2 className="h-3.5 w-3.5" />
+                        <span>{user.company}</span>
+                      </div>
+                      {user.accessibleCompanies && user.accessibleCompanies.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {user.accessibleCompanies.map((company) => (
+                            <span 
+                              key={company}
+                              className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-md"
+                            >
+                              {company}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -105,8 +126,10 @@ const Auth = () => {
             ))}
           </div>
 
-          <div className="mt-4 text-center text-xs text-muted-foreground">
-            <p>This is a demo environment. Click any role to access the dashboard.</p>
+          <div className="mt-6 text-center">
+            <p className="text-xs text-muted-foreground">
+              Demo environment • Select any role to access the dashboard
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -54,10 +54,10 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
   return (
     <div className="space-y-6">
       <div className="animate-slide-up">
-        <h2 className="text-3xl fredoka-bold text-foreground">
+        <h2 className="text-3xl font-bold text-foreground tracking-tight">
           {role && getRoleWelcome(role)}
         </h2>
-        <p className="fredoka-regular text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2">
           Welcome back, {fullName} • VGG Holdings
         </p>
       </div>
@@ -70,15 +70,15 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
       />
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50">
-          <TabsTrigger value="overview" className="fredoka-medium">Overview</TabsTrigger>
-          <TabsTrigger value="analytics" className="fredoka-medium">Analytics</TabsTrigger>
-          <TabsTrigger value="ai" className="fredoka-medium">AI Assistant</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50 p-1">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="ai">AI Assistant</TabsTrigger>
           {(role === 'ceo' || role === 'cto') && (
             <>
-              <TabsTrigger value="companies" className="fredoka-medium">Child Companies</TabsTrigger>
-              <TabsTrigger value="integrations" className="fredoka-medium">Integrations</TabsTrigger>
-              <TabsTrigger value="workflows" className="fredoka-medium">Workflows</TabsTrigger>
+              <TabsTrigger value="companies">Child Companies</TabsTrigger>
+              <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="workflows">Workflows</TabsTrigger>
             </>
           )}
         </TabsList>

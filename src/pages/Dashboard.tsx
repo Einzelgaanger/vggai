@@ -64,8 +64,8 @@ const Dashboard = () => {
         onViewChange={() => {}}
         userEmail={user?.email || ""}
       />
-      <main className="container mx-auto p-6 max-w-7xl">
-        <DashboardContent 
+      <main className="container mx-auto p-8 max-w-7xl">
+        <DashboardContent
           role={user?.role || null} 
           userEmail={user?.email || ""} 
           fullName={user?.fullName || ""}
