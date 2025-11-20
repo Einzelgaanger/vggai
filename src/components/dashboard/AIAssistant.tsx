@@ -17,14 +17,93 @@ interface AIAssistantProps {
 }
 
 const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) => {
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Generate session ID for demo users
+  const getSessionId = () => {
+    let sessionId = localStorage.getItem('vgg-session-id');
+    if (!sessionId) {
+      sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('vgg-session-id', sessionId);
+    }
+    return sessionId;
+  };
+
+  // Load conversation history on mount or when context changes
   useEffect(() => {
+    loadConversationHistory();
+  }, [role, userEmail, selectedCompanyId]);
+
+  const loadConversationHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const sessionId = getSessionId();
+
+      // Try to find existing conversation for this session and context
+      const { data: existingConversation, error: convError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('session_id', sessionId)
+        .eq('user_email', userEmail)
+        .eq('user_role', role || 'guest')
+        .eq('selected_company_id', selectedCompanyId || 'none')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (convError) {
+        console.error('Error loading conversation:', convError);
+        initializeWelcomeMessage();
+        return;
+      }
+
+      if (existingConversation) {
+        setConversationId(existingConversation.id);
+
+        // Load messages for this conversation
+        const { data: chatMessages, error: msgError } = await supabase
+          .from('chat_messages')
+          .select('role, content, created_at')
+          .eq('conversation_id', existingConversation.id)
+          .order('created_at', { ascending: true });
+
+        if (msgError) {
+          console.error('Error loading messages:', msgError);
+          initializeWelcomeMessage();
+          return;
+        }
+
+        if (chatMessages && chatMessages.length > 0) {
+          const loadedMessages = chatMessages
+            .filter(msg => msg.role !== 'system')
+            .map(msg => ({
+              role: msg.role as 'user' | 'assistant',
+              content: msg.content,
+            }));
+          
+          setMessages(loadedMessages);
+        } else {
+          initializeWelcomeMessage();
+        }
+      } else {
+        initializeWelcomeMessage();
+      }
+    } catch (error) {
+      console.error('Error in loadConversationHistory:', error);
+      initializeWelcomeMessage();
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const initializeWelcomeMessage = () => {
     const roleNames: Record<string, string> = {
       ceo: "CEO",
       cto: "CTO",
@@ -57,7 +136,52 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
         content: welcomeMessage,
       },
     ]);
-  }, [role]);
+  };
+
+  const saveMessageToDb = async (msgRole: string, content: string) => {
+    try {
+      const sessionId = getSessionId();
+      
+      // Create conversation if it doesn't exist
+      if (!conversationId) {
+        const { data: newConversation, error: convError } = await supabase
+          .from('conversations')
+          .insert({
+            session_id: sessionId,
+            user_email: userEmail,
+            user_role: role || 'guest',
+            selected_company_id: selectedCompanyId || 'none',
+          })
+          .select('id')
+          .single();
+
+        if (convError) {
+          console.error('Error creating conversation:', convError);
+          return;
+        }
+
+        if (newConversation) {
+          setConversationId(newConversation.id);
+
+          // Save the message
+          await supabase.from('chat_messages').insert({
+            conversation_id: newConversation.id,
+            role: msgRole,
+            content,
+          });
+        }
+      } else {
+        // Save message to existing conversation
+        await supabase.from('chat_messages').insert({
+          conversation_id: conversationId,
+          role: msgRole,
+          content,
+        });
+      }
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  };
 
   const streamChat = async (userMessage: Message) => {
     try {
@@ -144,6 +268,11 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
         }
       }
 
+      // Save complete assistant message to database
+      if (assistantMessage) {
+        await saveMessageToDb("assistant", assistantMessage);
+      }
+
       setIsLoading(false);
     } catch (error) {
       console.error("Chat error:", error);
@@ -153,17 +282,17 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isLoadingHistory) return;
 
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-    };
-
+    const userMessage: Message = { role: "user", content: input };
+    const userInput = input;
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     resetTextarea();
     setIsLoading(true);
+
+    // Save user message to database
+    await saveMessageToDb("user", userInput);
 
     await streamChat(userMessage);
   };
@@ -244,61 +373,74 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
           }
         `}</style>
         <div className="py-6 space-y-6 max-w-4xl mx-auto pb-32">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex gap-3 ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {message.role === "assistant" && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                  <Brain className="h-4 w-4 text-primary-foreground" />
+          {isLoadingHistory ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-6 shadow-lg">
+                <div className="flex items-center gap-3 text-foreground">
+                  <Brain className="h-6 w-6 animate-pulse text-primary" />
+                  <span className="text-lg">Loading conversation history...</span>
                 </div>
-              )}
-              <div
-                className={`rounded-xl px-4 py-3 max-w-[75%] ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "bg-white text-foreground shadow-lg border border-border"
-                }`}
-              >
-                <p 
-                  className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
-                    message.role === "user" && !expandedMessages.has(index) ? 'line-clamp-4' : ''
+              </div>
+            </div>
+          ) : (
+            <>
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex gap-3 ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.content}
-                </p>
-                {message.role === "user" && message.content.length > 200 && (
-                  <button
-                    onClick={() => toggleMessageExpansion(index)}
-                    className="text-xs mt-2 underline text-primary-foreground/80 hover:text-primary-foreground"
+                  {message.role === "assistant" && (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                      <Brain className="h-4 w-4 text-primary-foreground" />
+                    </div>
+                  )}
+                  <div
+                    className={`rounded-xl px-4 py-3 max-w-[75%] ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground shadow-lg"
+                        : "bg-white text-foreground shadow-lg border border-border"
+                    }`}
                   >
-                    {expandedMessages.has(index) ? 'Show Less' : 'Read More'}
-                  </button>
-                )}
-              </div>
-              {message.role === "user" && (
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-primary-foreground">{getUserInitials()}</span>
+                    <p 
+                      className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
+                        message.role === "user" && !expandedMessages.has(index) ? 'line-clamp-4' : ''
+                      }`}
+                    >
+                      {message.content}
+                    </p>
+                    {message.role === "user" && message.content.length > 200 && (
+                      <button
+                        onClick={() => toggleMessageExpansion(index)}
+                        className="text-xs mt-2 underline text-primary-foreground/80 hover:text-primary-foreground"
+                      >
+                        {expandedMessages.has(index) ? 'Show Less' : 'Read More'}
+                      </button>
+                    )}
+                  </div>
+                  {message.role === "user" && (
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-semibold text-primary-foreground">{getUserInitials()}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex gap-3 justify-start">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                   <Brain className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                  <div className="rounded-xl px-4 py-3 bg-white border border-border shadow-lg">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
+                    </div>
+                  </div>
                 </div>
               )}
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-               <Brain className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <div className="rounded-xl px-4 py-3 bg-white border border-border shadow-lg">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>

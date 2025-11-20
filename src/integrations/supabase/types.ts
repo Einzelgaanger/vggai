@@ -198,6 +198,38 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           api_endpoint: string | null
@@ -231,6 +263,39 @@ export type Database = {
           metadata?: Json | null
           name?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          selected_company_id: string | null
+          session_id: string
+          updated_at: string | null
+          user_email: string | null
+          user_id: string | null
+          user_role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          selected_company_id?: string | null
+          session_id: string
+          updated_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          selected_company_id?: string | null
+          session_id?: string
+          updated_at?: string | null
+          user_email?: string | null
+          user_id?: string | null
+          user_role?: string | null
         }
         Relationships: []
       }
