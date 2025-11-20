@@ -17,25 +17,38 @@ interface Role {
   name: string;
 }
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 interface Credential {
   id: string;
   role_id: string;
+  company_id: string | null;
   credential_name: string;
   api_endpoint: string;
   auth_type: 'bearer' | 'api_key' | 'oauth';
   is_active: boolean;
   last_tested_at: string | null;
   roles: { name: string };
+  companies?: { name: string };
 }
 
-export function APICredentialManager() {
+interface APICredentialManagerProps {
+  selectedCompanyId?: string | null;
+}
+
+export function APICredentialManager({ selectedCompanyId }: APICredentialManagerProps) {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   const [testing, setTesting] = useState<Record<string, boolean>>({});
   const [newCredential, setNewCredential] = useState({
     role_id: '',
+    company_id: '',
     credential_name: '',
     api_endpoint: '',
     auth_type: 'bearer' as 'bearer' | 'api_key' | 'oauth',
@@ -47,7 +60,7 @@ export function APICredentialManager() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedCompanyId]);
 
   const fetchData = async () => {
     // Fetch roles
@@ -58,15 +71,30 @@ export function APICredentialManager() {
     
     if (rolesData) setRoles(rolesData);
 
+    // Fetch companies
+    const { data: companiesData } = await supabase
+      .from('companies')
+      .select('id, name')
+      .eq('is_active', true)
+      .order('name');
+    
+    if (companiesData) setCompanies(companiesData);
+
     // Fetch credentials
-    const { data: credsData } = await supabase
+    let query = supabase
       .from('api_credentials')
       .select(`
         *,
-        roles (name)
+        roles (name),
+        companies (name)
       `)
       .order('credential_name');
 
+    if (selectedCompanyId) {
+      query = query.eq('company_id', selectedCompanyId);
+    }
+
+    const { data: credsData } = await query;
     if (credsData) setCredentials(credsData as any);
   };
 
@@ -111,6 +139,7 @@ export function APICredentialManager() {
       .from('api_credentials')
       .insert({
         role_id: newCredential.role_id,
+        company_id: newCredential.company_id || selectedCompanyId || null,
         credential_name: newCredential.credential_name,
         api_endpoint: newCredential.api_endpoint,
         auth_type: newCredential.auth_type,
@@ -132,6 +161,7 @@ export function APICredentialManager() {
       setIsDialogOpen(false);
       setNewCredential({
         role_id: '',
+        company_id: '',
         credential_name: '',
         api_endpoint: '',
         auth_type: 'bearer',
@@ -255,6 +285,26 @@ export function APICredentialManager() {
               </div>
 
               <div className="space-y-2">
+                <Label>Company</Label>
+                <Select
+                  value={newCredential.company_id || selectedCompanyId || ''}
+                  onValueChange={(value) => setNewCredential({ ...newCredential, company_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a company (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Companies</SelectItem>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label>Credential Name *</Label>
                 <Input
                   value={newCredential.credential_name}
@@ -351,6 +401,7 @@ export function APICredentialManager() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Company</TableHead>
               <TableHead>Endpoint</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Status</TableHead>
@@ -364,6 +415,13 @@ export function APICredentialManager() {
                 <TableCell className="font-medium">{cred.credential_name}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{cred.roles.name}</Badge>
+                </TableCell>
+                <TableCell>
+                  {cred.companies?.name ? (
+                    <Badge variant="secondary">{cred.companies.name}</Badge>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">All Companies</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
                   {cred.api_endpoint}

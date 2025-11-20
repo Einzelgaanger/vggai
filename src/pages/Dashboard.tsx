@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<"dashboard" | "ai">("dashboard");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,9 +79,18 @@ const Dashboard = () => {
       />
       <main className="container mx-auto p-6 max-w-7xl">
         {activeView === "dashboard" ? (
-          <DashboardContent role={userRole} userEmail={user?.email || ""} />
+          <DashboardContent 
+            role={userRole} 
+            userEmail={user?.email || ""} 
+            selectedCompanyId={selectedCompanyId}
+            onCompanySelect={setSelectedCompanyId}
+          />
         ) : (
-          <AIAssistant role={userRole} userEmail={user?.email || ""} />
+          <AIAssistant 
+            role={userRole} 
+            userEmail={user?.email || ""}
+            selectedCompanyId={selectedCompanyId}
+          />
         )}
       </main>
     </div>
