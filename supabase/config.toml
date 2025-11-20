@@ -14,3 +14,7 @@ verify_jwt = false
 
 [functions.refresh-oauth-tokens]
 verify_jwt = false
+
+[functions.seamlesshr-api]
+verify_jwt = false
+
