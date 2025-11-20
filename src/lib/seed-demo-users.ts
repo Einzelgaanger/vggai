@@ -1,79 +1,87 @@
 import { supabase } from "@/integrations/supabase/client";
 
-// Demo user configurations
+// All demo users are VGG Holdings employees
+// They can access data from child companies: Seamless HR, Kleva HR
 export const DEMO_USERS = [
-  // Company 1 - VGG Holdings
   {
     email: "ceo@vgg.demo",
     password: "Demo2024!CEO",
     fullName: "Sarah Johnson",
     role: "ceo",
-    company: "VGG Holdings"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR', 'Kleva HR']
   },
   {
     email: "cto@vgg.demo",
     password: "Demo2024!CTO",
     fullName: "Michael Chen",
     role: "cto",
-    company: "VGG Holdings"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR', 'Kleva HR']
   },
   {
     email: "cfo@vgg.demo",
     password: "Demo2024!CFO",
     fullName: "Emily Rodriguez",
     role: "cfo",
-    company: "VGG Holdings"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR', 'Kleva HR']
   },
   {
     email: "hr.manager@vgg.demo",
     password: "Demo2024!HR",
     fullName: "David Thompson",
     role: "hr_manager",
-    company: "VGG Holdings"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR', 'Kleva HR']
   },
   {
     email: "eng.manager@vgg.demo",
     password: "Demo2024!ENG",
     fullName: "Lisa Wang",
     role: "engineering_manager",
-    company: "VGG Holdings"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Kleva HR']
   },
   {
     email: "senior.dev@vgg.demo",
     password: "Demo2024!DEV",
     fullName: "James Martinez",
     role: "senior_developer",
-    company: "VGG Holdings"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Kleva HR']
   },
   {
     email: "analyst@vgg.demo",
     password: "Demo2024!DATA",
     fullName: "Ana Silva",
     role: "data_analyst",
-    company: "VGG Holdings"
-  },
-  
-  // Company 2 - TechCorp
-  {
-    email: "ceo@techcorp.demo",
-    password: "Demo2024!CEO2",
-    fullName: "Robert Kim",
-    role: "ceo",
-    company: "TechCorp"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR', 'Kleva HR']
   },
   {
-    email: "cto@techcorp.demo",
-    password: "Demo2024!CTO2",
-    fullName: "Jennifer Lee",
-    role: "cto",
-    company: "TechCorp"
-  },
-  {
-    email: "sales.manager@techcorp.demo",
+    email: "sales.manager@vgg.demo",
     password: "Demo2024!SALES",
     fullName: "Tom Anderson",
     role: "sales_manager",
-    company: "TechCorp"
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR']
+  },
+  {
+    email: "finance.manager@vgg.demo",
+    password: "Demo2024!FINANCE",
+    fullName: "Jennifer White",
+    role: "finance_manager",
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+  },
+  {
+    email: "ops.manager@vgg.demo",
+    password: "Demo2024!OPS",
+    fullName: "Robert Garcia",
+    role: "operations_manager",
+    company: "VGG Holdings",
+    accessibleCompanies: ['Seamless HR']
   }
 ];
 
