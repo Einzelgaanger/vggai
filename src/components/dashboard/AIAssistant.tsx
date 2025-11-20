@@ -432,10 +432,13 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
   };
 
   return (
-    <div className="flex flex-col h-full relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/5">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
+    <div className="flex flex-col h-full relative overflow-hidden">
+      {/* Enhanced background with gradient and pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/[0.02] via-50% to-accent/[0.02] pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.03] to-transparent pointer-events-none" />
+      {/* Subtle radial gradient overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.03),transparent_70%)] pointer-events-none" />
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b shadow-sm">
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 py-4">
