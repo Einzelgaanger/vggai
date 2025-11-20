@@ -33,8 +33,6 @@ interface RolePermission {
   role_id: string;
   api_endpoint_id: string;
   has_access: boolean;
-  can_read: boolean;
-  can_write: boolean;
   roles: { name: string } | null;
   api_endpoints: APIEndpoint | null;
 }
@@ -145,8 +143,6 @@ const RoleAPIAccessManager = ({ role }: RoleAPIAccessManagerProps) => {
         .from('role_api_permissions')
         .update({
           has_access: !currentPermission.has_access,
-          can_read: !currentPermission.has_access ? true : false,
-          can_write: false, // Reset write on toggle off
         })
         .eq('id', currentPermission.id);
 
@@ -163,8 +159,6 @@ const RoleAPIAccessManager = ({ role }: RoleAPIAccessManagerProps) => {
           role_id: selectedRole,
           api_endpoint_id: endpointId,
           has_access: true,
-          can_read: true,
-          can_write: false,
         }]);
 
       if (error) {
@@ -172,21 +166,6 @@ const RoleAPIAccessManager = ({ role }: RoleAPIAccessManagerProps) => {
         toast.error("Failed to create permission");
         return;
       }
-    }
-
-    fetchPermissions();
-  };
-
-  const handleUpdateWritePermission = async (permissionId: string, canWrite: boolean) => {
-    const { error } = await supabase
-      .from('role_api_permissions')
-      .update({ can_write: canWrite })
-      .eq('id', permissionId);
-
-    if (error) {
-      console.error('Error updating write permission:', error);
-      toast.error("Failed to update write permission");
-      return;
     }
 
     fetchPermissions();
@@ -363,26 +342,6 @@ const RoleAPIAccessManager = ({ role }: RoleAPIAccessManagerProps) => {
                           <p className="text-sm text-muted-foreground mb-1">{endpoint.endpoint_url}</p>
                           {endpoint.description && (
                             <p className="text-xs text-muted-foreground">{endpoint.description}</p>
-                          )}
-                          {permission?.has_access && (
-                            <div className="flex items-center gap-4 mt-2">
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={permission.can_read}
-                                  disabled
-                                />
-                                <Label className="text-xs">Read</Label>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={permission.can_write}
-                                  onCheckedChange={(checked) =>
-                                    handleUpdateWritePermission(permission.id, checked as boolean)
-                                  }
-                                />
-                                <Label className="text-xs">Write</Label>
-                              </div>
-                            </div>
                           )}
                         </div>
                         <div className="flex items-center gap-2">

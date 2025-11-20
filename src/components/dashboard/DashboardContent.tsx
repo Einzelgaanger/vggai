@@ -3,7 +3,7 @@ import EmbeddingsManager from "./EmbeddingsManager";
 import RealtimeMetricsChart from "./RealtimeMetricsChart";
 import CompanyManagement from "./CompanyManagement";
 import APIIntegrationManager from "./APIIntegrationManager";
-import APICredentialManager from "./APICredentialManager";
+import { APICredentialManager } from "./APICredentialManager";
 import RoleAPIAccessManager from "./RoleAPIAccessManager";
 import WorkflowAutomation from "./WorkflowAutomation";
 import APIDataMetrics from "./APIDataMetrics";
@@ -111,7 +111,7 @@ const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect 
 
             <TabsContent value="integrations" className="space-y-4">
               <APIIntegrationManager role={role} />
-              <APICredentialManager role={role} />
+              <APICredentialManager selectedCompanyId={selectedCompanyId} />
               <RoleAPIAccessManager role={role} />
             </TabsContent>
 
