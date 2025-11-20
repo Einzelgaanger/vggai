@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DEMO_USERS } from "@/lib/seed-demo-users";
 import { Building2, User } from "lucide-react";
+import vggLogo from "@/assets/vgg-logo.jpeg";
 
 interface MockUser {
   email: string;
@@ -50,9 +51,9 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <img 
-              src="/lovable-uploads/b5ced8c0-5733-4c8c-8bdb-b84a20c6e5cd.png" 
+              src={vggLogo} 
               alt="VGG Logo" 
-              className="h-16 w-16 object-contain"
+              className="h-16 w-16 object-contain rounded-lg"
             />
           </div>
           <CardTitle className="text-2xl text-center">
