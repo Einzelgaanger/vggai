@@ -1,30 +1,59 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LogOut, Shield } from "lucide-react";
 import { AdminPanel } from "@/components/dashboard/AdminPanel";
 import { DemoUserManager } from "@/components/admin/DemoUserManager";
-import { toast } from "sonner";
+
+interface MockUser {
+  email: string;
+  fullName: string;
+  role: string;
+  company: string;
+  id: string;
+}
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
+  const [user, setUser] = useState<MockUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if admin is authenticated
-    const isAuthenticated = localStorage.getItem("admin_authenticated");
-    if (!isAuthenticated) {
-      toast.error("Please login to access admin dashboard");
-      navigate("/admin");
-    } else {
-      setLoading(false);
-    }
+    const checkMockUser = () => {
+      const mockUserStr = localStorage.getItem('mockUser');
+      
+      if (!mockUserStr) {
+        toast.error("Please login to access admin dashboard");
+        navigate("/auth");
+        return;
+      }
+
+      try {
+        const mockUser = JSON.parse(mockUserStr) as MockUser;
+        
+        // Only allow CEO and CTO access
+        if (!['ceo', 'cto'].includes(mockUser.role)) {
+          toast.error("Access denied. Admin privileges required.");
+          navigate("/dashboard");
+          return;
+        }
+        
+        setUser(mockUser);
+      } catch (error) {
+        navigate("/auth");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkMockUser();
   }, [navigate]);
 
   const handleSignOut = () => {
-    localStorage.removeItem("admin_authenticated");
+    localStorage.removeItem('mockUser');
     toast.success("Signed out successfully");
-    navigate("/admin");
+    navigate("/auth");
   };
 
   if (loading) {
@@ -46,7 +75,7 @@ const AdminDashboard = () => {
             <div>
               <h2 className="fredoka-semibold text-sm text-foreground">Admin Portal</h2>
               <p className="fredoka-regular text-xs text-muted-foreground">
-                Data Administrator
+                {user?.fullName} ({user?.role.toUpperCase()})
               </p>
             </div>
           </div>
