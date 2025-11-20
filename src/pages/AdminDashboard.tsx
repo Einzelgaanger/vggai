@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Shield } from "lucide-react";
 import { AdminPanel } from "@/components/dashboard/AdminPanel";
+import { DemoUserManager } from "@/components/admin/DemoUserManager";
 import { toast } from "sonner";
 
 const AdminDashboard = () => {
@@ -59,7 +60,8 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto p-6 max-w-7xl">
+      <main className="container mx-auto p-6 max-w-7xl space-y-6">
+        <DemoUserManager />
         <AdminPanel />
       </main>
     </div>
