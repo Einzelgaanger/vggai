@@ -7,6 +7,26 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
+    cors: {
+      origin: [
+        "https://vggai.onrender.com",
+        "http://localhost:8080",
+        "http://localhost:5173",
+      ],
+      credentials: true,
+    },
+  },
+  preview: {
+    host: "::",
+    port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
+    cors: {
+      origin: [
+        "https://vggai.onrender.com",
+        "http://localhost:8080",
+        "http://localhost:5173",
+      ],
+      credentials: true,
+    },
   },
   plugins: [react()],
   resolve: {
