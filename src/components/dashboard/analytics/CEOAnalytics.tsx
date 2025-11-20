@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { getSeamlessHREmployees } from "@/lib/seamlesshr-service";
+import { getCompanyMockData } from "@/lib/enhanced-mock-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -80,29 +81,43 @@ const CEOAnalytics = ({ childCompany }: CEOAnalyticsProps) => {
         setTenureData(tenData);
 
       } else {
-        // Mock data for Kleva HR
-        setDepartmentData([
-          { name: 'Engineering', value: 45 },
-          { name: 'Sales', value: 32 },
-          { name: 'Marketing', value: 28 },
-          { name: 'HR', value: 15 },
-          { name: 'Finance', value: 18 },
-        ]);
-        setBranchData([
-          { name: 'Lagos', value: 120 },
-          { name: 'Abuja', value: 80 },
-          { name: 'Port Harcourt', value: 45 },
-        ]);
-        setGenderData([
-          { name: 'Male', value: 145 },
-          { name: 'Female', value: 100 },
-        ]);
-        setTenureData([
-          { name: '0-2 years', value: 85 },
-          { name: '3-5 years', value: 95 },
-          { name: '6-10 years', value: 50 },
-          { name: '11+ years', value: 15 },
-        ]);
+        // Use enhanced mock data for other companies
+        const mockData = getCompanyMockData(childCompany);
+        
+        if (mockData) {
+          setDepartmentData(
+            mockData.analytics.departmentData.map(d => ({ name: d.name, value: d.count }))
+          );
+          setBranchData(mockData.analytics.branchData);
+          setGenderData(mockData.analytics.genderData);
+          setTenureData(
+            mockData.analytics.tenureData.map(t => ({ name: t.range, value: t.count }))
+          );
+        } else {
+          // Fallback generic mock data
+          setDepartmentData([
+            { name: 'Engineering', value: 45 },
+            { name: 'Sales', value: 32 },
+            { name: 'Marketing', value: 28 },
+            { name: 'HR', value: 15 },
+            { name: 'Finance', value: 18 },
+          ]);
+          setBranchData([
+            { name: 'Lagos', value: 120 },
+            { name: 'Abuja', value: 80 },
+            { name: 'Port Harcourt', value: 45 },
+          ]);
+          setGenderData([
+            { name: 'Male', value: 145 },
+            { name: 'Female', value: 100 },
+          ]);
+          setTenureData([
+            { name: '0-2 years', value: 85 },
+            { name: '3-5 years', value: 95 },
+            { name: '6-10 years', value: 50 },
+            { name: '11+ years', value: 15 },
+          ]);
+        }
       }
     } catch (error) {
       console.error('Failed to load analytics:', error);
