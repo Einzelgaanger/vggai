@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 // All demo users are VGG Holdings employees
-// They can access data from child companies: Seamless HR, Kleva HR
+// They can access data from child companies: Seamless HR, Kleva HR, WorkflowHR, PayStackHR, TalentHub, PeopleCore
 export const DEMO_USERS = [
   {
     email: "ceo@vgg.demo",
@@ -9,7 +9,7 @@ export const DEMO_USERS = [
     fullName: "Sarah Johnson",
     role: "ceo",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+    accessibleCompanies: ['Seamless HR', 'Kleva HR', 'WorkflowHR', 'PayStackHR', 'TalentHub', 'PeopleCore']
   },
   {
     email: "cto@vgg.demo",
@@ -17,7 +17,7 @@ export const DEMO_USERS = [
     fullName: "Michael Chen",
     role: "cto",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+    accessibleCompanies: ['Seamless HR', 'Kleva HR', 'WorkflowHR', 'PayStackHR', 'TalentHub', 'PeopleCore']
   },
   {
     email: "cfo@vgg.demo",
@@ -25,7 +25,7 @@ export const DEMO_USERS = [
     fullName: "Emily Rodriguez",
     role: "cfo",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+    accessibleCompanies: ['Seamless HR', 'Kleva HR', 'WorkflowHR', 'PayStackHR', 'TalentHub', 'PeopleCore']
   },
   {
     email: "hr.manager@vgg.demo",
@@ -33,7 +33,7 @@ export const DEMO_USERS = [
     fullName: "David Thompson",
     role: "hr_manager",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+    accessibleCompanies: ['Seamless HR', 'Kleva HR', 'WorkflowHR', 'TalentHub', 'PeopleCore']
   },
   {
     email: "eng.manager@vgg.demo",
@@ -41,7 +41,7 @@ export const DEMO_USERS = [
     fullName: "Lisa Wang",
     role: "engineering_manager",
     company: "VGG Holdings",
-    accessibleCompanies: ['Kleva HR']
+    accessibleCompanies: ['Kleva HR', 'WorkflowHR', 'PeopleCore']
   },
   {
     email: "senior.dev@vgg.demo",
@@ -49,7 +49,7 @@ export const DEMO_USERS = [
     fullName: "James Martinez",
     role: "senior_developer",
     company: "VGG Holdings",
-    accessibleCompanies: ['Kleva HR']
+    accessibleCompanies: ['Kleva HR', 'WorkflowHR']
   },
   {
     email: "analyst@vgg.demo",
@@ -57,7 +57,7 @@ export const DEMO_USERS = [
     fullName: "Ana Silva",
     role: "data_analyst",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+    accessibleCompanies: ['Seamless HR', 'Kleva HR', 'WorkflowHR', 'PayStackHR', 'TalentHub']
   },
   {
     email: "sales.manager@vgg.demo",
@@ -65,7 +65,7 @@ export const DEMO_USERS = [
     fullName: "Tom Anderson",
     role: "sales_manager",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR']
+    accessibleCompanies: ['Seamless HR', 'WorkflowHR', 'PeopleCore']
   },
   {
     email: "finance.manager@vgg.demo",
@@ -73,7 +73,7 @@ export const DEMO_USERS = [
     fullName: "Jennifer White",
     role: "finance_manager",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR', 'Kleva HR']
+    accessibleCompanies: ['Seamless HR', 'Kleva HR', 'PayStackHR', 'PeopleCore']
   },
   {
     email: "ops.manager@vgg.demo",
@@ -81,7 +81,7 @@ export const DEMO_USERS = [
     fullName: "Robert Garcia",
     role: "operations_manager",
     company: "VGG Holdings",
-    accessibleCompanies: ['Seamless HR']
+    accessibleCompanies: ['Seamless HR', 'WorkflowHR', 'PeopleCore']
   }
 ];
 

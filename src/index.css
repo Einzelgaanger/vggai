@@ -246,22 +246,14 @@
       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 
-  /* Custom scrollbar for chat */
-  .chat-scrollbar::-webkit-scrollbar {
-    width: 6px;
+  /* Hide scrollbar completely */
+  .no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
   }
 
-  .chat-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .chat-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted));
-    border-radius: 3px;
-  }
-
-  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.3);
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 
   /* AI Avatar Pulse Animation */

@@ -12,6 +12,8 @@ import APIDataMetrics from "./APIDataMetrics";
 import AIAssistant from "./AIAssistant";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, BarChart3, Brain, Building2, Plug, GitBranch } from "lucide-react";
+import CEOOverview from "./overview/CEOOverview";
+import CEOAnalytics from "./analytics/CEOAnalytics";
 
 interface DashboardContentProps {
   role: string | null;
@@ -147,7 +149,11 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
 
         <div className="mt-6">
           <TabsContent value="overview" className="space-y-6 animate-fade-in mt-0">
-            <APIDataMetrics role={role} userEmail={userEmail} childCompany={selectedChildCompany} />
+            {role === 'ceo' ? (
+              <CEOOverview childCompany={selectedChildCompany} />
+            ) : (
+              <APIDataMetrics role={role} userEmail={userEmail} childCompany={selectedChildCompany} />
+            )}
           </TabsContent>
 
           <TabsContent value="ai" className="space-y-6 animate-fade-in mt-0">
@@ -155,32 +161,36 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6 animate-fade-in mt-0">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <RealtimeMetricsChart
-                metricType="revenue"
-                title="Revenue Stream"
-                description="Real-time revenue metrics"
-                chartType="area"
-              />
-              <RealtimeMetricsChart
-                metricType="users"
-                title="User Growth"
-                description="Active users in real-time"
-                chartType="line"
-              />
-              <RealtimeMetricsChart
-                metricType="performance"
-                title="System Performance"
-                description="Performance metrics"
-                chartType="line"
-              />
-              <RealtimeMetricsChart
-                metricType="engagement"
-                title="User Engagement"
-                description="Engagement metrics"
-                chartType="area"
-              />
-            </div>
+            {role === 'ceo' ? (
+              <CEOAnalytics childCompany={selectedChildCompany} />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <RealtimeMetricsChart
+                  metricType="revenue"
+                  title="Revenue Stream"
+                  description="Real-time revenue metrics"
+                  chartType="area"
+                />
+                <RealtimeMetricsChart
+                  metricType="users"
+                  title="User Growth"
+                  description="Active users in real-time"
+                  chartType="line"
+                />
+                <RealtimeMetricsChart
+                  metricType="performance"
+                  title="System Performance"
+                  description="Performance metrics"
+                  chartType="line"
+                />
+                <RealtimeMetricsChart
+                  metricType="engagement"
+                  title="User Engagement"
+                  description="Engagement metrics"
+                  chartType="area"
+                />
+              </div>
+            )}
           </TabsContent>
 
           {(role === 'ceo' || role === 'cto') && (

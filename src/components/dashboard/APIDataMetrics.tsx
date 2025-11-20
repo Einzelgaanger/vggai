@@ -4,6 +4,7 @@ import { Users, Activity, Target } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSeamlessHREmployeeCount } from "@/lib/seamlesshr-service";
 import { getKlevaMockEmployeeCount, getKlevaMockMetrics } from "@/lib/kleva-mock-data";
+import { getCompanyMockData } from "@/lib/enhanced-mock-data";
 import { toast } from "sonner";
 
 interface Metric {
@@ -43,8 +44,20 @@ const APIDataMetrics = ({ role, userEmail, childCompany = 'Seamless HR' }: APIDa
           departments: 5,
           openPositions: 3,
         };
-      } else if (childCompany === 'Kleva HR') {
-        companyMetrics = await getKlevaMockMetrics();
+      } else {
+        // Use enhanced mock data for all other companies
+        const mockData = getCompanyMockData(childCompany);
+        if (mockData) {
+          companyMetrics = {
+            totalEmployees: mockData.metrics.totalEmployees,
+            activeEmployees: mockData.metrics.activeEmployees,
+            departments: mockData.metrics.departments,
+            openPositions: Math.ceil(mockData.metrics.totalEmployees * 0.08), // 8% open positions
+          };
+        } else {
+          // Fallback to Kleva data structure if company not found
+          companyMetrics = await getKlevaMockMetrics();
+        }
       }
 
       const metricDefinitions = getMetricDefinitions(role);
