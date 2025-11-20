@@ -1,155 +1,128 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
-import { z } from "zod";
+import { DEMO_USERS } from "@/lib/seed-demo-users";
+import { Building2, User } from "lucide-react";
 
-const authSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+interface MockUser {
+  email: string;
+  fullName: string;
+  role: string;
+  company: string;
+}
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(false); // Default to sign up mode
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/dashboard");
-      }
-    };
-    checkSession();
+    // Check if already "logged in"
+    const mockUser = localStorage.getItem('mockUser');
+    if (mockUser) {
+      navigate("/dashboard");
+    }
   }, [navigate]);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const validation = authSchema.safeParse({ email, password });
-      if (!validation.success) {
-        toast.error(validation.error.errors[0].message);
-        setLoading(false);
-        return;
-      }
-
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast.error("Invalid email or password");
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success("Welcome back!");
-          navigate("/dashboard");
-        }
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
-        });
-
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast.error("This email is already registered");
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success("Account created! Please sign in.");
-          setIsLogin(true);
-        }
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred");
-      console.error("Auth error:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleRoleSelect = (user: MockUser) => {
+    // Store mock user in localStorage
+    localStorage.setItem('mockUser', JSON.stringify({
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      company: user.company,
+      id: `mock-${user.role}-${user.company}` // Generate a mock ID
+    }));
+    
+    navigate("/dashboard");
   };
 
+  // Group users by company
+  const companies = [...new Set(DEMO_USERS.map(u => u.company))];
+  const filteredUsers = selectedCompany 
+    ? DEMO_USERS.filter(u => u.company === selectedCompany)
+    : DEMO_USERS;
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md p-8 shadow-strong border border-border">
-        <div className="mb-8 text-center">
-          <div className="w-16 h-16 rounded-lg bg-gradient-primary flex items-center justify-center mx-auto mb-4 shadow-medium">
-            <span className="text-primary-foreground fredoka-bold text-2xl">CD</span>
-          </div>
-          <h1 className="text-3xl fredoka-bold text-foreground mb-2">
-            Corporate Dashboard
-          </h1>
-          <p className="fredoka-regular text-muted-foreground">
-            {isLogin ? "Sign in to your account" : "Create your account"}
-          </p>
-        </div>
-
-        <form onSubmit={handleAuth} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="fredoka-medium">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="fredoka-regular"
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
+      <Card className="w-full max-w-4xl">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src="/lovable-uploads/b5ced8c0-5733-4c8c-8bdb-b84a20c6e5cd.png" 
+              alt="VGG Logo" 
+              className="h-16 w-16 object-contain"
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password" className="fredoka-medium">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="fredoka-regular"
-            />
+          <CardTitle className="text-2xl text-center">
+            Demo Login
+          </CardTitle>
+          <CardDescription className="text-center">
+            Select a role to demo the platform
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Company Filter */}
+          <div className="mb-6">
+            <Label className="mb-2 block">Filter by Company</Label>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={selectedCompany === "" ? "default" : "outline"}
+                onClick={() => setSelectedCompany("")}
+                size="sm"
+              >
+                All Companies
+              </Button>
+              {companies.map((company) => (
+                <Button
+                  key={company}
+                  variant={selectedCompany === company ? "default" : "outline"}
+                  onClick={() => setSelectedCompany(company)}
+                  size="sm"
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  {company}
+                </Button>
+              ))}
+            </div>
           </div>
 
-          <Button type="submit" className="w-full fredoka-semibold shadow-medium hover:shadow-strong" disabled={loading}>
-            {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
-          </Button>
-        </form>
+          {/* User Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto">
+            {filteredUsers.map((user) => (
+              <Card 
+                key={user.email}
+                className="cursor-pointer hover:border-primary transition-colors"
+                onClick={() => handleRoleSelect(user)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-primary/10 p-2 rounded-lg">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm truncate">
+                        {user.fullName}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {user.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Building2 className="h-3 w-3" />
+                        {user.company}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="fredoka-medium text-sm text-primary hover:underline transition-all"
-          >
-            {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
-          </button>
-        </div>
-
-        <div className="mt-6 p-4 bg-muted/50 border border-border rounded-lg">
-          <p className="fredoka-semibold text-xs text-foreground mb-2">First time? Sign up with these emails:</p>
-          <p className="fredoka-regular text-xs text-muted-foreground">CEO: ceo@company.com</p>
-          <p className="fredoka-regular text-xs text-muted-foreground">Developer: dev@company.com</p>
-          <p className="fredoka-regular text-xs text-muted-foreground">Password: demo123 (or any 6+ chars)</p>
-          <p className="fredoka-regular text-xs text-muted-foreground mt-2">Your role is assigned automatically based on your email!</p>
-        </div>
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            <p>This is a demo environment. Click any role to access the dashboard.</p>
+          </div>
+        </CardContent>
       </Card>
     </div>
   );
