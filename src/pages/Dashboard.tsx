@@ -11,13 +11,12 @@ interface MockUser {
   role: string;
   company: string;
   id: string;
+  accessibleCompanies?: string[];
 }
 
 const Dashboard = () => {
   const [user, setUser] = useState<MockUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<"dashboard" | "ai">("dashboard");
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,25 +60,17 @@ const Dashboard = () => {
       <DashboardNav 
         role={user?.role || null} 
         onSignOut={handleSignOut}
-        activeView={activeView}
-        onViewChange={setActiveView}
+        activeView="dashboard"
+        onViewChange={() => {}}
         userEmail={user?.email || ""}
       />
       <main className="container mx-auto p-6 max-w-7xl">
-        {activeView === "dashboard" ? (
-          <DashboardContent 
-            role={user?.role || null} 
-            userEmail={user?.email || ""} 
-            selectedCompanyId={selectedCompanyId}
-            onCompanySelect={setSelectedCompanyId}
-          />
-        ) : (
-          <AIAssistant 
-            role={user?.role || null} 
-            userEmail={user?.email || ""}
-            selectedCompanyId={selectedCompanyId}
-          />
-        )}
+        <DashboardContent 
+          role={user?.role || null} 
+          userEmail={user?.email || ""} 
+          fullName={user?.fullName || ""}
+          accessibleCompanies={user?.accessibleCompanies || ['Seamless HR']}
+        />
       </main>
     </div>
   );

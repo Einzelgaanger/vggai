@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChildCompanySelector } from "./ChildCompanySelector";
 import EmbeddingsManager from "./EmbeddingsManager";
 import RealtimeMetricsChart from "./RealtimeMetricsChart";
 import CompanyManagement from "./CompanyManagement";
@@ -7,15 +9,19 @@ import { APICredentialManager } from "./APICredentialManager";
 import RoleAPIAccessManager from "./RoleAPIAccessManager";
 import WorkflowAutomation from "./WorkflowAutomation";
 import APIDataMetrics from "./APIDataMetrics";
+import AIAssistant from "./AIAssistant";
 
 interface DashboardContentProps {
   role: string | null;
   userEmail: string;
-  selectedCompanyId?: string | null;
-  onCompanySelect?: (companyId: string) => void;
+  fullName: string;
+  accessibleCompanies: string[];
 }
 
-const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect }: DashboardContentProps) => {
+const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: DashboardContentProps) => {
+  const [selectedChildCompany, setSelectedChildCompany] = useState<string>(
+    accessibleCompanies[0] || 'Seamless HR'
+  );
   // All metrics are now fetched from APIs via APIDataMetrics component
   // No hardcoded data - everything comes from real API endpoints
 
@@ -52,26 +58,37 @@ const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect 
           {role && getRoleWelcome(role)}
         </h2>
         <p className="fredoka-regular text-muted-foreground mt-2">
-          Welcome back, {userEmail}
+          Welcome back, {fullName} • VGG Holdings
         </p>
       </div>
+
+      {/* Child Company Selector */}
+      <ChildCompanySelector 
+        selectedCompany={selectedChildCompany}
+        onCompanyChange={setSelectedChildCompany}
+        accessibleCompanies={accessibleCompanies}
+      />
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50">
           <TabsTrigger value="overview" className="fredoka-medium">Overview</TabsTrigger>
           <TabsTrigger value="analytics" className="fredoka-medium">Analytics</TabsTrigger>
+          <TabsTrigger value="ai" className="fredoka-medium">AI Assistant</TabsTrigger>
           {(role === 'ceo' || role === 'cto') && (
             <>
-              <TabsTrigger value="companies" className="fredoka-medium">Companies</TabsTrigger>
+              <TabsTrigger value="companies" className="fredoka-medium">Child Companies</TabsTrigger>
               <TabsTrigger value="integrations" className="fredoka-medium">Integrations</TabsTrigger>
               <TabsTrigger value="workflows" className="fredoka-medium">Workflows</TabsTrigger>
-              <TabsTrigger value="ai" className="fredoka-medium">AI</TabsTrigger>
             </>
           )}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 animate-fade-in">
           <APIDataMetrics role={role} userEmail={userEmail} />
+        </TabsContent>
+
+        <TabsContent value="ai" className="space-y-4 animate-fade-in">
+          <AIAssistant role={role} userEmail={userEmail} selectedCompanyId={selectedChildCompany} />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4 animate-fade-in">
@@ -111,7 +128,7 @@ const DashboardContent = ({ role, userEmail, selectedCompanyId, onCompanySelect 
 
             <TabsContent value="integrations" className="space-y-4">
               <APIIntegrationManager role={role} />
-              <APICredentialManager selectedCompanyId={selectedCompanyId} />
+              <APICredentialManager />
               <RoleAPIAccessManager role={role} />
             </TabsContent>
 

@@ -12,6 +12,7 @@ interface MockUser {
   fullName: string;
   role: string;
   company: string;
+  accessibleCompanies?: string[];
 }
 
 const Auth = () => {
@@ -33,17 +34,16 @@ const Auth = () => {
       fullName: user.fullName,
       role: user.role,
       company: user.company,
+      accessibleCompanies: user.accessibleCompanies || [],
       id: `mock-${user.role}-${user.company}` // Generate a mock ID
     }));
     
     navigate("/dashboard");
   };
 
-  // Group users by company
-  const companies = [...new Set(DEMO_USERS.map(u => u.company))];
-  const filteredUsers = selectedCompany 
-    ? DEMO_USERS.filter(u => u.company === selectedCompany)
-    : DEMO_USERS;
+  // All users work for VGG Holdings
+  const companies = ['VGG Holdings'];
+  const filteredUsers = DEMO_USERS;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
@@ -60,33 +60,18 @@ const Auth = () => {
             Demo Login
           </CardTitle>
           <CardDescription className="text-center">
-            Select a role to demo the platform
+            All users are VGG Holdings employees<br />
+            Select your role to access child company data
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Company Filter */}
-          <div className="mb-6">
-            <Label className="mb-2 block">Filter by Company</Label>
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                variant={selectedCompany === "" ? "default" : "outline"}
-                onClick={() => setSelectedCompany("")}
-                size="sm"
-              >
-                All Companies
-              </Button>
-              {companies.map((company) => (
-                <Button
-                  key={company}
-                  variant={selectedCompany === company ? "default" : "outline"}
-                  onClick={() => setSelectedCompany(company)}
-                  size="sm"
-                >
-                  <Building2 className="h-4 w-4 mr-2" />
-                  {company}
-                </Button>
-              ))}
-            </div>
+          <div className="mb-4 p-3 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>VGG Holdings</strong> employees can access data from child companies:
+              <span className="block mt-1 text-primary font-medium">
+                • Seamless HR (Live API) • Kleva HR (Mock Data)
+              </span>
+            </p>
           </div>
 
           {/* User Grid */}
