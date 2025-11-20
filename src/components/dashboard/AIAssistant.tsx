@@ -62,20 +62,26 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
   const streamChat = async (userMessage: Message) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Please sign in to use the AI assistant");
-        return;
-      }
 
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+
       const response = await fetch(CHAT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        headers,
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          role,
+          userEmail,
+          selectedCompanyId,
+        }),
       });
 
       if (!response.ok) {
