@@ -6,35 +6,35 @@
 
 @layer base {
   :root {
-    /* Corporate Blue & Grey Theme */
+    /* Corporate Blue & Grey Theme - Darker & More Saturated */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 220 50% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 50% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 220 50% 8%;
 
-    /* Primary: Corporate Blue */
-    --primary: 214 84% 56%;
+    /* Primary: Deep Corporate Blue */
+    --primary: 214 95% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Slate Grey */
-    --secondary: 215 16% 47%;
+    /* Secondary: Dark Slate */
+    --secondary: 215 25% 35%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Accent: Teal */
-    --accent: 174 72% 56%;
+    /* Accent: Rich Teal */
+    --accent: 174 85% 45%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success: Green */
-    --success: 142 76% 36%;
+    /* Success: Deep Green */
+    --success: 142 85% 30%;
     --success-foreground: 0 0% 100%;
 
     /* Muted backgrounds */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 50% 94%;
+    --muted-foreground: 215 25% 35%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -74,30 +74,30 @@
   }
 
   .dark {
-    /* Dark mode: Deep Navy & Slate */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* Dark mode: Darker & More Saturated */
+    --background: 222 50% 9%;
+    --foreground: 210 45% 98%;
 
-    --card: 222 47% 13%;
-    --card-foreground: 210 40% 98%;
+    --card: 222 50% 11%;
+    --card-foreground: 210 45% 98%;
 
-    --popover: 222 47% 13%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 222 50% 11%;
+    --popover-foreground: 210 45% 98%;
 
-    --primary: 214 84% 56%;
+    --primary: 214 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 27%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 35% 25%;
+    --secondary-foreground: 210 45% 98%;
     
-    --accent: 174 72% 56%;
+    --accent: 174 85% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 142 85% 35%;
     --success-foreground: 0 0% 100%;
 
-    --muted: 215 25% 27%;
-    --muted-foreground: 217 33% 64%;
+    --muted: 215 35% 22%;
+    --muted-foreground: 217 40% 65%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -141,6 +141,7 @@
     @apply bg-background text-foreground;
     font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -151,7 +152,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold;
+    @apply font-bold;
   }
 }
 
