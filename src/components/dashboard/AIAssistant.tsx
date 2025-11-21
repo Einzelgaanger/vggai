@@ -42,35 +42,44 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
 
   // Markdown renderer component
   const MarkdownContent = ({ content }: { content: string }) => {
+    // Pre-process content to better format data
+    let processedContent = content;
+    
+    // Convert "EMPLOYEE X:" patterns to headers
+    processedContent = processedContent.replace(/EMPLOYEE (\d+):/g, '\n\n## Employee $1\n\n');
+    
+    // Convert "KEY: value" patterns to better formatted lines
+    processedContent = processedContent.replace(/([A-Z][A-Z\s]+):\s*/g, '\n**$1:** ');
+    
     return (
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          p: ({ children }) => <p className="mb-4 last:mb-0 leading-relaxed text-foreground/90">{children}</p>,
-          strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-          em: ({ children }) => <em className="italic text-foreground/90">{children}</em>,
-          ul: ({ children }) => <ul className="mb-4 ml-6 space-y-2 list-disc marker:text-primary/70">{children}</ul>,
-          ol: ({ children }) => <ol className="mb-4 ml-6 space-y-2 list-decimal marker:text-primary/70">{children}</ol>,
-          li: ({ children }) => <li className="leading-relaxed text-foreground/90 pl-2">{children}</li>,
-          h1: ({ children }) => <h1 className="text-xl font-bold mb-4 mt-6 first:mt-0 text-foreground">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-lg font-semibold mb-3 mt-5 first:mt-0 text-foreground">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-base font-semibold mb-2.5 mt-4 first:mt-0 text-foreground">{children}</h3>,
+          p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed text-foreground">{children}</p>,
+          strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+          em: ({ children }) => <em className="italic text-foreground">{children}</em>,
+          ul: ({ children }) => <ul className="mb-4 ml-6 space-y-1.5 list-disc marker:text-primary">{children}</ul>,
+          ol: ({ children }) => <ol className="mb-4 ml-6 space-y-1.5 list-decimal marker:text-primary">{children}</ol>,
+          li: ({ children }) => <li className="leading-relaxed text-foreground pl-2">{children}</li>,
+          h1: ({ children }) => <h1 className="text-xl font-bold mb-4 mt-6 first:mt-0 text-foreground border-b pb-2 border-border">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-lg font-bold mb-3 mt-5 first:mt-0 text-foreground border-b pb-1.5 border-border/50">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-base font-bold mb-2.5 mt-4 first:mt-0 text-foreground">{children}</h3>,
           code: ({ className, children }) => {
             const isInline = !className;
             return isInline ? (
-              <code className="px-1.5 py-0.5 rounded-md bg-muted text-sm font-mono text-foreground border border-border">{children}</code>
+              <code className="px-1.5 py-0.5 rounded-md bg-muted text-sm font-mono text-foreground border border-border font-semibold">{children}</code>
             ) : (
               <code className="block p-4 rounded-lg bg-muted/50 text-sm font-mono overflow-x-auto my-4 border border-border">{children}</code>
             );
           },
           pre: ({ children }) => <pre className="my-4">{children}</pre>,
           blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-primary/40 pl-4 my-4 italic text-muted-foreground bg-muted/30 py-2 rounded-r">
+            <blockquote className="border-l-4 border-primary pl-4 my-4 italic text-foreground bg-muted/40 py-2 rounded-r">
               {children}
             </blockquote>
           ),
           a: ({ href, children }) => (
-            <a href={href} className="text-primary hover:text-primary/80 underline underline-offset-2 font-medium transition-colors" target="_blank" rel="noopener noreferrer">
+            <a href={href} className="text-primary hover:text-primary/80 underline underline-offset-2 font-semibold transition-colors" target="_blank" rel="noopener noreferrer">
               {children}
             </a>
           ),
@@ -82,14 +91,14 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
               </table>
             </div>
           ),
-          thead: ({ children }) => <thead className="bg-muted/50">{children}</thead>,
+          thead: ({ children }) => <thead className="bg-muted/70">{children}</thead>,
           tbody: ({ children }) => <tbody className="divide-y divide-border">{children}</tbody>,
-          tr: ({ children }) => <tr className="hover:bg-muted/30 transition-colors">{children}</tr>,
-          th: ({ children }) => <th className="px-4 py-2 text-left font-semibold text-foreground border-r border-border last:border-r-0">{children}</th>,
-          td: ({ children }) => <td className="px-4 py-2 text-foreground/90 border-r border-border last:border-r-0">{children}</td>,
+          tr: ({ children }) => <tr className="hover:bg-muted/40 transition-colors">{children}</tr>,
+          th: ({ children }) => <th className="px-4 py-2 text-left font-bold text-foreground border-r border-border last:border-r-0">{children}</th>,
+          td: ({ children }) => <td className="px-4 py-2 text-foreground border-r border-border last:border-r-0">{children}</td>,
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     );
   };

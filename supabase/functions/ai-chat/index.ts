@@ -235,9 +235,20 @@ CRITICAL INSTRUCTIONS:
 
 6. If data is empty or zero, state this accurately - do not hallucinate data.
 
-7. Present information in a clear, business-friendly way WITHOUT using markdown formatting like **bold** or *italics*.
+7. Present information in a WELL-FORMATTED, readable way using markdown:
+   - Use ## for main headings (e.g., ## Employee 1, ## Key Metrics)
+   - Use **bold** for field labels (e.g., **Staff Name:**, **Department:**)
+   - Add line breaks between different data items
+   - For employee data or structured records, format each field on a new line
+   - Use bullet points or numbered lists for multiple items
+   - Example format:
+     ## Employee 1
+     **Staff Name:** John Doe
+     **Email:** john.doe@example.com
+     **Department:** Engineering
+     **Employment Date:** 2020-01-15
 
-8. Use CAPS for emphasis instead of markdown.
+8. For structured data (like employee records), ALWAYS format with clear headers and line breaks - never dump data as one continuous line.
 
 9. Never mention technical terms like "API endpoints", "database tables", or "permissions" - speak in business terms like "data sources", "information", "reports".
 
