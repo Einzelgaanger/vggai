@@ -42,14 +42,14 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
 
   // Markdown renderer component
   const MarkdownContent = ({ content }: { content: string }) => {
-    // Pre-process content to better format data
+    // Pre-process content to ensure proper formatting
     let processedContent = content;
     
-    // Convert "EMPLOYEE X:" patterns to headers
-    processedContent = processedContent.replace(/EMPLOYEE (\d+):/g, '\n\n## Employee $1\n\n');
+    // Remove any malformed bold markers (** with only spaces)
+    processedContent = processedContent.replace(/\*\*\s+\*\*/g, '');
     
-    // Convert "KEY: value" patterns to better formatted lines
-    processedContent = processedContent.replace(/([A-Z][A-Z\s]+):\s*/g, '\n**$1:** ');
+    // Ensure proper spacing after bold field labels
+    processedContent = processedContent.replace(/\*\*([^*]+):\*\*/g, '**$1:** ');
     
     return (
       <ReactMarkdown
@@ -61,8 +61,8 @@ const AIAssistant = ({ role, userEmail, selectedCompanyId }: AIAssistantProps) =
           ul: ({ children }) => <ul className="mb-4 ml-6 space-y-1.5 list-disc marker:text-primary">{children}</ul>,
           ol: ({ children }) => <ol className="mb-4 ml-6 space-y-1.5 list-decimal marker:text-primary">{children}</ol>,
           li: ({ children }) => <li className="leading-relaxed text-foreground pl-2">{children}</li>,
-          h1: ({ children }) => <h1 className="text-xl font-bold mb-4 mt-6 first:mt-0 text-foreground border-b pb-2 border-border">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-lg font-bold mb-3 mt-5 first:mt-0 text-foreground border-b pb-1.5 border-border/50">{children}</h2>,
+          h1: ({ children }) => <h1 className="text-xl font-bold mb-4 mt-6 first:mt-0 text-foreground border-b-2 pb-2 border-primary/20">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-lg font-bold mb-3 mt-5 first:mt-0 text-foreground border-b pb-1.5 border-border">{children}</h2>,
           h3: ({ children }) => <h3 className="text-base font-bold mb-2.5 mt-4 first:mt-0 text-foreground">{children}</h3>,
           code: ({ className, children }) => {
             const isInline = !className;

@@ -235,20 +235,37 @@ CRITICAL INSTRUCTIONS:
 
 6. If data is empty or zero, state this accurately - do not hallucinate data.
 
-7. Present information in a WELL-FORMATTED, readable way using markdown:
-   - Use ## for main headings (e.g., ## Employee 1, ## Key Metrics)
-   - Use **bold** for field labels (e.g., **Staff Name:**, **Department:**)
-   - Add line breaks between different data items
-   - For employee data or structured records, format each field on a new line
-   - Use bullet points or numbered lists for multiple items
-   - Example format:
-     ## Employee 1
-     **Staff Name:** John Doe
-     **Email:** john.doe@example.com
-     **Department:** Engineering
-     **Employment Date:** 2020-01-15
+7. CRITICAL FORMATTING RULES - You MUST follow this exact format for structured data:
+   
+   For employee records or similar structured data:
+   - Use heading level 2 (two hash symbols) for each employee number
+   - Add a blank line after the heading
+   - Put each field on its own line using bold formatting for the label
+   - Add TWO SPACES at the end of each field line to force markdown line breaks
+   - Add a blank line between different employees
+   
+   IMPORTANT FORMATTING RULES:
+   - Each field MUST be on its own line with two spaces at the end
+   - Use bold for field labels followed by colon and space (example: **Staff Name:** value)
+   - NEVER put multiple fields on the same line
+   - NEVER use bold formatting with only spaces inside - this is malformed markdown
+   - Always add blank lines before and after section headings
+   
+   Example structure (replace hash-hash with actual markdown heading):
+   [heading] Employee 1
+   [blank line]
+   **Staff Name:** John Doe  
+   **Staff ID:** EMP001  
+   **Email:** john.doe@company.com  
+   **Phone:** +1234567890  
+   **Department:** Engineering  
+   [blank line]
+   [heading] Employee 2
+   [blank line]
+   **Staff Name:** Jane Smith  
+   **Staff ID:** EMP002  
 
-8. For structured data (like employee records), ALWAYS format with clear headers and line breaks - never dump data as one continuous line.
+8. For structured data (like employee records), you MUST use the format described above with proper line breaks and spacing.
 
 9. Never mention technical terms like "API endpoints", "database tables", or "permissions" - speak in business terms like "data sources", "information", "reports".
 
