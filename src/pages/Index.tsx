@@ -84,18 +84,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b bg-card sticky top-0 z-50 shadow-sm">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 blur-md rounded-lg"></div>
-                <img 
-                  src={vggLogo} 
-                  alt="VGG Logo" 
-                  className="h-10 w-10 object-contain rounded-lg relative z-10 shadow-md"
-                />
-              </div>
+              <img 
+                src={vggLogo} 
+                alt="VGG Logo" 
+                className="h-10 w-10 object-contain rounded-lg"
+              />
               <div>
                 <span className="font-semibold text-lg text-foreground">VGG Holdings</span>
                 <p className="text-xs text-muted-foreground hidden sm:block">Enterprise Portal</p>
@@ -124,18 +121,17 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]"></div>
+      <section className="relative overflow-hidden bg-muted/30">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 lg:py-32">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 border border-primary/20">
               <Globe className="w-4 h-4" />
               <span>Enterprise-Grade Platform</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
               Unified Dashboard for
-              <span className="block mt-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="block mt-2 text-primary">
                 Multi-Company Management
               </span>
             </h1>
@@ -148,7 +144,7 @@ const Index = () => {
               <Button 
                 onClick={() => navigate("/auth")} 
                 size="lg" 
-                className="gap-2 text-base px-8 h-12 shadow-lg hover:shadow-xl transition-all"
+                className="gap-2 text-base px-8 h-12"
               >
                 Get Started
                 <ArrowRight className="w-5 h-5" />
@@ -157,7 +153,7 @@ const Index = () => {
                 onClick={() => navigate("/auth")} 
                 variant="outline" 
                 size="lg"
-                className="text-base px-8 h-12 border-2"
+                className="text-base px-8 h-12"
               >
                 Schedule Demo
               </Button>
@@ -179,7 +175,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-24 bg-muted/30">
+      <section className="py-20 md:py-24 bg-background">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -196,10 +192,10 @@ const Index = () => {
               return (
                 <Card 
                   key={index}
-                  className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg group"
+                  className="hover:border-primary transition-all duration-300 hover:shadow-md group"
                 >
                   <CardContent className="p-6">
-                    <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4`}>
                       <Icon className={`w-6 h-6 ${feature.color}`} />
                     </div>
                     <h3 className="font-semibold text-xl text-foreground mb-2">
@@ -217,7 +213,7 @@ const Index = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 md:py-24">
+      <section className="py-20 md:py-24 bg-muted/30">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -230,7 +226,7 @@ const Index = () => {
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <p className="text-foreground">{benefit}</p>
                   </div>
                 ))}
@@ -247,10 +243,10 @@ const Index = () => {
               </div>
             </div>
             <div className="relative">
-              <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-8 border-2 border-primary/20">
-                <div className="space-y-6">
+              <Card className="border-2 border-primary/20">
+                <CardContent className="p-8 space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                       <TrendingUp className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -259,7 +255,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center border border-accent/20">
                       <Users className="w-6 h-6 text-accent" />
                     </div>
                     <div>
@@ -268,23 +264,23 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <Zap className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    <div className="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center border border-success/20">
+                      <Zap className="w-6 h-6 text-success" />
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">AI-Powered Analytics</div>
                       <div className="text-sm text-muted-foreground">Intelligent insights and recommendations</div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-24 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10">
+      <section className="py-20 md:py-24 bg-primary/5 border-y">
         <div className="container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Ready to Transform Your Operations?
@@ -305,7 +301,7 @@ const Index = () => {
               onClick={() => navigate("/admin")} 
               variant="outline" 
               size="lg"
-              className="px-8 h-12 text-base border-2"
+              className="px-8 h-12 text-base"
             >
               Admin Access
             </Button>
@@ -314,18 +310,15 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-card py-12">
+      <footer className="bg-card py-12">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 blur-md rounded-lg"></div>
-                <img 
-                  src={vggLogo} 
-                  alt="VGG Logo" 
-                  className="h-8 w-8 object-contain rounded-lg relative z-10"
-                />
-              </div>
+              <img 
+                src={vggLogo} 
+                alt="VGG Logo" 
+                className="h-8 w-8 object-contain rounded-lg"
+              />
               <span className="font-semibold text-foreground">VGG Holdings</span>
             </div>
             <p className="text-sm text-muted-foreground text-center md:text-right">
