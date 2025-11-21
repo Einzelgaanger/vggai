@@ -19,6 +19,8 @@ export default defineConfig({
   preview: {
     host: "::",
     port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
+    // Allow Render public URL
+    allowedHosts: ["vggai.onrender.com"],
     cors: {
       origin: [
         "https://vggai.onrender.com",
