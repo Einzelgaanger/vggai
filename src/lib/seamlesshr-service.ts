@@ -85,22 +85,50 @@ export async function getSeamlessHREmployeeCount(): Promise<number> {
 }
 
 /**
+ * Fetch departments from Seamless HR
+ */
+export async function getSeamlessHRDepartments(): Promise<any> {
+  return fetchSeamlessHRData('/v1/companies/departments');
+}
+
+/**
+ * Fetch branches from Seamless HR
+ */
+export async function getSeamlessHRBranches(): Promise<any> {
+  return fetchSeamlessHRData('/v1/companies/branches');
+}
+
+/**
+ * Fetch job roles from Seamless HR
+ */
+export async function getSeamlessHRJobRoles(): Promise<any> {
+  return fetchSeamlessHRData('/v1/companies/job-roles');
+}
+
+/**
+ * Fetch company info from Seamless HR
+ */
+export async function getSeamlessHRCompanyInfo(): Promise<any> {
+  return fetchSeamlessHRData('/v1/companies');
+}
+
+/**
  * Fetch leave requests from Seamless HR
  */
 export async function getSeamlessHRLeaveData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/leave/requests');
+  return fetchSeamlessHRData('/v1/leave-requests');
 }
 
 /**
- * Fetch performance reviews from Seamless HR
+ * Fetch performance cycles from Seamless HR
  */
 export async function getSeamlessHRPerformanceData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/performance/reviews');
+  return fetchSeamlessHRData('/v1/performance/cycles');
 }
 
 /**
- * Fetch payroll summary from Seamless HR
+ * Fetch payroll data from Seamless HR
  */
 export async function getSeamlessHRPayrollData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/payroll/summary');
+  return fetchSeamlessHRData('/v1/payroll');
 }
