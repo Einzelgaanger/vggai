@@ -85,22 +85,22 @@ export async function getSeamlessHREmployeeCount(): Promise<number> {
 }
 
 /**
- * Fetch leave data from Seamless HR
+ * Fetch leave requests from Seamless HR
  */
 export async function getSeamlessHRLeaveData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/leave');
+  return fetchSeamlessHRData('/v1/leave/requests');
 }
 
 /**
- * Fetch performance data from Seamless HR
+ * Fetch performance reviews from Seamless HR
  */
 export async function getSeamlessHRPerformanceData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/performance');
+  return fetchSeamlessHRData('/v1/performance/reviews');
 }
 
 /**
- * Fetch payroll data from Seamless HR
+ * Fetch payroll summary from Seamless HR
  */
 export async function getSeamlessHRPayrollData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/payroll');
+  return fetchSeamlessHRData('/v1/payroll/summary');
 }
