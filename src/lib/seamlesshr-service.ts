@@ -132,3 +132,139 @@ export async function getSeamlessHRPerformanceData(): Promise<any> {
 export async function getSeamlessHRPayrollData(): Promise<any> {
   return fetchSeamlessHRData('/v1/payroll');
 }
+
+/**
+ * Attendance Record Interface
+ */
+export interface SeamlessHRAttendanceRecord {
+  firstName: string;
+  lastName: string;
+  employeeCode: string;
+  attendanceId: string | null;
+  scheduleType: 'ROTATIONAL' | 'FULLTIME';
+  setClockInDateTime: string;
+  setClockOutDateTime: string;
+  clockInDateTime: string | null;
+  clockOutDateTime: string | null;
+  breakStartTime: string | null;
+  breakEndTime: string | null;
+  clockInSource: string;
+  clockOutSource: string;
+  punctualityStatus: string;
+}
+
+export interface SeamlessHRAttendanceResponse {
+  message: string;
+  data: SeamlessHRAttendanceRecord[];
+}
+
+/**
+ * Attendance Query Parameters
+ */
+export interface AttendanceQueryParams {
+  page?: number; // Defaults to 1
+  perPage?: number; // Defaults to 10
+  search?: string; // Filter by employee name
+  scheduleType?: 'ROTATIONAL' | 'FULLTIME'; // Filter by schedule type
+  dateType?: 'week' | 'month' | 'custom'; // Filter by date type
+  startDate?: string; // Required when dateType is 'custom' (format: YYYY-MM-DD)
+  endDate?: string; // Required when dateType is 'custom' (format: YYYY-MM-DD)
+}
+
+/**
+ * Fetch attendance records from Seamless HR
+ * 
+ * @param params Query parameters for filtering attendance records
+ * @returns Attendance records response
+ * 
+ * @example
+ * // Get first page with default settings
+ * const records = await getSeamlessHRAttendanceRecords();
+ * 
+ * @example
+ * // Get records for current week
+ * const records = await getSeamlessHRAttendanceRecords({ dateType: 'week' });
+ * 
+ * @example
+ * // Get records for a custom date range
+ * const records = await getSeamlessHRAttendanceRecords({
+ *   dateType: 'custom',
+ *   startDate: '2024-01-01',
+ *   endDate: '2024-01-31',
+ *   perPage: 50
+ * });
+ * 
+ * @example
+ * // Search for specific employee
+ * const records = await getSeamlessHRAttendanceRecords({
+ *   search: 'John Doe',
+ *   scheduleType: 'FULLTIME'
+ * });
+ */
+export async function getSeamlessHRAttendanceRecords(
+  params?: AttendanceQueryParams
+): Promise<SeamlessHRAttendanceResponse> {
+  // Build query string
+  const queryParams = new URLSearchParams();
+  
+  if (params?.page !== undefined) {
+    queryParams.append('page', params.page.toString());
+  }
+  
+  if (params?.perPage !== undefined) {
+    queryParams.append('perPage', params.perPage.toString());
+  }
+  
+  if (params?.search) {
+    queryParams.append('search', params.search);
+  }
+  
+  if (params?.scheduleType) {
+    queryParams.append('scheduleType', params.scheduleType);
+  }
+  
+  if (params?.dateType) {
+    queryParams.append('dateType', params.dateType);
+    
+    if (params.dateType === 'custom') {
+      if (!params.startDate || !params.endDate) {
+        throw new Error('startDate and endDate are required when dateType is "custom"');
+      }
+      queryParams.append('startDate', params.startDate);
+      queryParams.append('endDate', params.endDate);
+    }
+  }
+  
+  // Build endpoint with query parameters
+  const endpoint = `/v1/attendances${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  
+  const data = await fetchSeamlessHRData<SeamlessHRAttendanceResponse>(endpoint);
+  
+  // Handle response structure
+  if (data && typeof data === 'object') {
+    // If response already has the expected structure
+    if ('message' in data && 'data' in data) {
+      return data as SeamlessHRAttendanceResponse;
+    }
+    // If data is directly the array
+    if (Array.isArray(data)) {
+      return {
+        message: 'Successfully fetched attendance records',
+        data: data as SeamlessHRAttendanceRecord[],
+      };
+    }
+    // If data is nested
+    if ('data' in data && Array.isArray((data as { data: unknown[]; message?: string }).data)) {
+      const nestedData = data as { data: SeamlessHRAttendanceRecord[]; message?: string };
+      return {
+        message: nestedData.message || 'Successfully fetched attendance records',
+        data: nestedData.data,
+      };
+    }
+  }
+  
+  return {
+    message: 'Successfully fetched attendance records',
+    data: [],
+  };
+}

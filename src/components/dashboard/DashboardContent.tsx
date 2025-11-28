@@ -10,6 +10,7 @@ import RoleAPIAccessManager from "./RoleAPIAccessManager";
 import WorkflowAutomation from "./WorkflowAutomation";
 import APIDataMetrics from "./APIDataMetrics";
 import AIAssistant from "./AIAssistant";
+import { WebsiteScraper } from "./WebsiteScraper";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, BarChart3, Brain, Building2, Plug, GitBranch } from "lucide-react";
 import CEOOverview from "./overview/CEOOverview";
@@ -203,6 +204,7 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
                 <APIIntegrationManager role={role} />
                 <APICredentialManager />
                 <RoleAPIAccessManager role={role} />
+                <WebsiteScraper />
               </TabsContent>
 
               <TabsContent value="workflows" className="space-y-6 animate-fade-in mt-0">
