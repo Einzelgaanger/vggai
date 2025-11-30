@@ -88,28 +88,22 @@ export async function getSeamlessHREmployeeCount(): Promise<number> {
  * Fetch departments from Seamless HR
  */
 export async function getSeamlessHRDepartments(): Promise<any> {
-  return fetchSeamlessHRData('/v1/companies/departments?company_name=Integration Company');
+  return fetchSeamlessHRData('/v1/companies/departments?company=Integration Company');
 }
 
 /**
  * Fetch branches from Seamless HR
+ * Note: Branches endpoint not found in official API documentation
  */
 export async function getSeamlessHRBranches(): Promise<any> {
-  return fetchSeamlessHRData('/v1/companies/branches?company_name=Integration Company');
+  return fetchSeamlessHRData('/v1/companies/branches?company=Integration Company');
 }
 
 /**
  * Fetch job roles from Seamless HR
  */
 export async function getSeamlessHRJobRoles(): Promise<any> {
-  return fetchSeamlessHRData('/v1/companies/job-roles?company_name=Integration Company');
-}
-
-/**
- * Fetch company info from Seamless HR
- */
-export async function getSeamlessHRCompanyInfo(): Promise<any> {
-  return fetchSeamlessHRData('/v1/companies?company_name=Integration Company');
+  return fetchSeamlessHRData('/v1/companies/job_roles?company=Integration Company');
 }
 
 /**
@@ -120,6 +114,13 @@ export async function getSeamlessHRLeaveData(): Promise<any> {
 }
 
 /**
+ * Fetch leave policies from Seamless HR
+ */
+export async function getSeamlessHRLeavePolicies(): Promise<any> {
+  return fetchSeamlessHRData('/v1/leave/policies?company=Integration Company');
+}
+
+/**
  * Fetch performance cycles from Seamless HR
  */
 export async function getSeamlessHRPerformanceData(): Promise<any> {
@@ -127,10 +128,12 @@ export async function getSeamlessHRPerformanceData(): Promise<any> {
 }
 
 /**
- * Fetch payroll data from Seamless HR
+ * Fetch payroll ledger transactions from Seamless HR
+ * @param label - Payroll cycle label (e.g., "June 2024")
+ * @param batch - Batch number (defaults to 1)
  */
-export async function getSeamlessHRPayrollData(): Promise<any> {
-  return fetchSeamlessHRData('/v1/payroll?company_name=Integration Company');
+export async function getSeamlessHRPayrollData(label: string = 'June 2024', batch: number = 1): Promise<any> {
+  return fetchSeamlessHRData(`/v1/payroll/ledger-transactions?entity=Integration Company&label=${encodeURIComponent(label)}&batch=${batch}`);
 }
 
 /**
