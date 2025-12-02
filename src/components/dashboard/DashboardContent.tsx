@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChildCompanySelector } from "./ChildCompanySelector";
 import EmbeddingsManager from "./EmbeddingsManager";
@@ -24,9 +24,18 @@ interface DashboardContentProps {
 }
 
 const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: DashboardContentProps) => {
-  const [selectedChildCompany, setSelectedChildCompany] = useState<string>(
-    accessibleCompanies[0] || 'Seamless HR'
-  );
+  // Session persistence for last selected company
+  const [selectedChildCompany, setSelectedChildCompany] = useState<string>(() => {
+    const lastViewed = sessionStorage.getItem('lastViewedCompany');
+    return lastViewed && accessibleCompanies.includes(lastViewed) 
+      ? lastViewed 
+      : accessibleCompanies[0] || 'Seamless HR';
+  });
+
+  // Remember last viewed company during session
+  useEffect(() => {
+    sessionStorage.setItem('lastViewedCompany', selectedChildCompany);
+  }, [selectedChildCompany]);
 
   const getRoleWelcome = (role: string | null) => {
     const roleNames: Record<string, string> = {
@@ -97,9 +106,9 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
         accessibleCompanies={accessibleCompanies}
       />
 
-      {/* Main Tabs */}
+      {/* Main Tabs - Aligned with User Journey */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50 p-1.5 h-auto gap-1">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 bg-muted/50 p-1.5 h-auto gap-1">
           <TabsTrigger 
             value="overview" 
             className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
@@ -108,27 +117,27 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
             <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="analytics"
+            value="company-analytics"
             className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
           >
             <BarChart3 className="w-4 h-4" />
-            <span className="hidden sm:inline">Analytics</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="ai"
-            className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
-          >
-            <Brain className="w-4 h-4" />
-            <span className="hidden sm:inline">AI Assistant</span>
+            <span className="hidden sm:inline">Company Analytics</span>
           </TabsTrigger>
           {(role === 'ceo' || role === 'cto') && (
             <>
               <TabsTrigger 
-                value="companies"
+                value="group-analytics"
                 className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
               >
                 <Building2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Companies</span>
+                <span className="hidden sm:inline">Group Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="group-performance"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2"
+              >
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden sm:inline">Group Performance</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="integrations"
@@ -149,54 +158,50 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
         </TabsList>
 
         <div className="mt-6">
+          {/* Overview Tab - Group-wide metrics */}
           <TabsContent value="overview" className="space-y-6 animate-fade-in mt-0">
-            {role === 'ceo' ? (
-              <CEOOverview childCompany={selectedChildCompany} />
-            ) : (
-              <APIDataMetrics role={role} userEmail={userEmail} childCompany={selectedChildCompany} />
-            )}
+            <CEOOverview childCompany={selectedChildCompany} />
           </TabsContent>
 
-          <TabsContent value="ai" className="space-y-6 animate-fade-in mt-0">
-            <AIAssistant role={role} userEmail={userEmail} selectedCompanyId={selectedChildCompany} />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6 animate-fade-in mt-0">
-            {role === 'ceo' ? (
-              <CEOAnalytics childCompany={selectedChildCompany} />
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <RealtimeMetricsChart
-                  metricType="revenue"
-                  title="Revenue Stream"
-                  description="Real-time revenue metrics"
-                  chartType="area"
-                />
-                <RealtimeMetricsChart
-                  metricType="users"
-                  title="User Growth"
-                  description="Active users in real-time"
-                  chartType="line"
-                />
-                <RealtimeMetricsChart
-                  metricType="performance"
-                  title="System Performance"
-                  description="Performance metrics"
-                  chartType="line"
-                />
-                <RealtimeMetricsChart
-                  metricType="engagement"
-                  title="User Engagement"
-                  description="Engagement metrics"
-                  chartType="area"
-                />
-              </div>
-            )}
+          {/* Company Analytics Tab - Deep-dive into specific subsidiary */}
+          <TabsContent value="company-analytics" className="space-y-6 animate-fade-in mt-0">
+            <CEOAnalytics childCompany={selectedChildCompany} />
           </TabsContent>
 
           {(role === 'ceo' || role === 'cto') && (
             <>
-              <TabsContent value="companies" className="space-y-6 animate-fade-in mt-0">
+              {/* Group Analytics Tab - Cross-company analytics */}
+              <TabsContent value="group-analytics" className="space-y-6 animate-fade-in mt-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <RealtimeMetricsChart
+                    metricType="revenue"
+                    title="Group Revenue Stream"
+                    description="Real-time revenue across all entities"
+                    chartType="area"
+                  />
+                  <RealtimeMetricsChart
+                    metricType="users"
+                    title="Group Workforce Growth"
+                    description="Employee count across group"
+                    chartType="line"
+                  />
+                  <RealtimeMetricsChart
+                    metricType="performance"
+                    title="Group Performance"
+                    description="Consolidated performance metrics"
+                    chartType="line"
+                  />
+                  <RealtimeMetricsChart
+                    metricType="engagement"
+                    title="Group Engagement"
+                    description="Engagement metrics across entities"
+                    chartType="area"
+                  />
+                </div>
+              </TabsContent>
+
+              {/* Group Performance Tab - Performance comparisons */}
+              <TabsContent value="group-performance" className="space-y-6 animate-fade-in mt-0">
                 <CompanyManagement role={role} />
               </TabsContent>
 
