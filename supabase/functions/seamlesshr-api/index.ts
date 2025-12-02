@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { endpoint } = await req.json();
+    const { endpoint, method = 'GET', body } = await req.json();
     
-    console.log('SeamlessHR API Request:', endpoint);
+    console.log('SeamlessHR API Request:', { endpoint, method });
 
     const clientId = Deno.env.get('SEAMLESSHR_CLIENT_ID');
     const clientSecret = Deno.env.get('SEAMLESSHR_CLIENT_SECRET');
@@ -31,16 +31,25 @@ serve(async (req) => {
     const baseUrl = 'https://api-sandbox.seamlesshr.app';
     const url = `${baseUrl}${endpoint}`;
 
-    console.log('Fetching from:', url);
+    console.log('Fetching from:', url, 'Method:', method);
 
-    const response = await fetch(url, {
-      method: 'GET',
+    // Build request options
+    const requestOptions: RequestInit = {
+      method: method,
       headers: {
         'x-client-id': clientId,
         'x-client-secret': clientSecret,
         'Content-Type': 'application/json',
+        'accept': 'application/json',
       },
-    });
+    };
+
+    // Add body for POST/PUT/PATCH requests
+    if ((method === 'POST' || method === 'PUT' || method === 'PATCH') && body) {
+      requestOptions.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, requestOptions);
 
     const responseText = await response.text();
     console.log('SeamlessHR Response Status:', response.status);

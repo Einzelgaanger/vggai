@@ -11,6 +11,7 @@ import WorkflowAutomation from "./WorkflowAutomation";
 import APIDataMetrics from "./APIDataMetrics";
 import AIAssistant from "./AIAssistant";
 import { WebsiteScraper } from "./WebsiteScraper";
+import { PeopleOSDashboard } from "./peopleos/PeopleOSDashboard";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, BarChart3, Brain, Building2, Plug, GitBranch } from "lucide-react";
 import CEOOverview from "./overview/CEOOverview";
@@ -90,15 +91,15 @@ const DashboardContent = ({ role, userEmail, fullName, accessibleCompanies }: Da
         </div>
       </div>
 
-      {/* Child Company Selector */}
-      <ChildCompanySelector 
-        selectedCompany={selectedChildCompany}
-        onCompanyChange={setSelectedChildCompany}
-        accessibleCompanies={accessibleCompanies}
+      {/* PeopleOS Dashboard - Main View */}
+      <PeopleOSDashboard
+        role={role}
+        userEmail={userEmail}
+        fullName={fullName}
       />
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="overview" className="w-full">
+      {/* Legacy Tabs - Hidden by default, can be accessed via direct navigation */}
+      <Tabs defaultValue="overview" className="w-full hidden">
         <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-muted/50 p-1.5 h-auto gap-1">
           <TabsTrigger 
             value="overview" 
