@@ -5,6 +5,7 @@ import { getSeamlessHREmployees } from "@/lib/seamlesshr-service";
 import { getCompanyMockData } from "@/lib/enhanced-mock-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import MetricDrillDown from "../MetricDrillDown";
 
 interface CEOOverviewProps {
   childCompany: string;
@@ -22,6 +23,9 @@ interface MetricCard {
 const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<MetricCard[]>([]);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<{ title: string; employees: any[] } | null>(null);
+  const [allEmployees, setAllEmployees] = useState<any[]>([]);
 
   useEffect(() => {
     loadCEOMetrics();
@@ -32,6 +36,7 @@ const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
     try {
       if (childCompany === "Seamless HR") {
         const employees = await getSeamlessHREmployees();
+        setAllEmployees(employees);
         
         // Calculate comprehensive metrics
         const totalEmployees = employees.length;
@@ -116,6 +121,7 @@ const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
       } else {
         // Use enhanced mock data for other companies
         const mockData = getCompanyMockData(childCompany);
+        setAllEmployees(mockData?.employees || []);
         
         if (mockData) {
           const { metrics, performance } = mockData;
@@ -261,6 +267,14 @@ const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
     );
   }
 
+  const handleMetricClick = (metric: MetricCard) => {
+    setSelectedMetric({
+      title: metric.title,
+      employees: allEmployees
+    });
+    setDrillDownOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -269,7 +283,8 @@ const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
           return (
             <Card 
               key={index} 
-              className="p-6 hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20"
+              className="p-6 hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20 cursor-pointer"
+              onClick={() => handleMetricClick(metric)}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -314,6 +329,23 @@ const CEOOverview = ({ childCompany }: CEOOverviewProps) => {
           );
         })}
       </div>
+
+      {/* Drill-down Modal */}
+      {selectedMetric && (
+        <MetricDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          title={selectedMetric.title}
+          description="Detailed employee breakdown"
+          employees={selectedMetric.employees.map(emp => ({
+            id: emp.id || emp.employee_code,
+            name: `${emp.first_name} ${emp.last_name}`,
+            department: emp.department,
+            role: emp.job_role || emp.role,
+            status: emp.exit_status ? 'Inactive' : 'Active'
+          }))}
+        />
+      )}
     </div>
   );
 };
