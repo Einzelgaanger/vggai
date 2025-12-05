@@ -1,0 +1,849 @@
+\documentclass[11pt,a4paper]{article}
+
+% ========== Preamble ==========
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[default]{sourcesanspro}
+\usepackage{geometry}
+\geometry{top=2cm, bottom=2cm, left=2cm, right=2cm}
+
+% Color definitions
+\usepackage{xcolor}
+\definecolor{primaryBlue}{HTML}{0F172A}
+\definecolor{accentBlue}{HTML}{3B82F6}
+\definecolor{successGreen}{HTML}{10B981}
+\definecolor{warningAmber}{HTML}{F59E0B}
+\definecolor{lightGray}{HTML}{F8FAFC}
+\definecolor{mediumGray}{HTML}{64748B}
+\definecolor{vggRed}{HTML}{DC2626}
+\definecolor{prodgPurple}{HTML}{7C3AED}
+
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{hyperref}
+\usepackage{fontawesome5}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accentBlue,
+    urlcolor=accentBlue
+}
+
+% Fix section formatting
+\titleformat{\section}
+{\color{primaryBlue}\sffamily\Large\bfseries}
+{}{0em}
+{}
+[\vspace{-0.3em}{\color{accentBlue}\titlerule[1.5pt]}\vspace{0.2em}]
+
+\titleformat{\subsection}
+{\color{accentBlue}\sffamily\large\bfseries}
+{}{0em}
+{}
+
+\titleformat{\subsubsection}
+{\color{mediumGray}\sffamily\normalsize\bfseries}
+{}{0em}
+{}
+
+% Custom boxes
+\newtcolorbox{headerbox}{
+    enhanced,
+    colback=primaryBlue,
+    colframe=primaryBlue,
+    boxrule=0pt,
+    arc=8pt,
+    left=20pt,
+    right=20pt,
+    top=20pt,
+    bottom=20pt
+}
+
+\newtcolorbox{infobox}{
+    enhanced,
+    colback=lightGray,
+    colframe=accentBlue!30,
+    boxrule=1pt,
+    arc=6pt,
+    left=15pt,
+    right=15pt,
+    top=12pt,
+    bottom=12pt
+}
+
+\newtcolorbox{importantbox}{
+    enhanced,
+    colback=white,
+    colframe=vggRed,
+    boxrule=2pt,
+    arc=6pt,
+    left=15pt,
+    right=15pt,
+    top=12pt,
+    bottom=12pt
+}
+
+\newtcolorbox{successbox}{
+    enhanced,
+    colback=white,
+    colframe=successGreen,
+    boxrule=2pt,
+    arc=6pt,
+    left=15pt,
+    right=15pt,
+    top=12pt,
+    bottom=12pt
+}
+
+\newtcolorbox{sheetbox}[1]{
+    enhanced,
+    colback=lightGray,
+    colframe=prodgPurple,
+    boxrule=1.5pt,
+    arc=6pt,
+    left=15pt,
+    right=15pt,
+    top=12pt,
+    bottom=12pt,
+    title={\color{white}\textbf{#1}},
+    attach boxed title to top left={yshift=-3mm,xshift=5mm},
+    boxed title style={colback=prodgPurple,arc=3pt}
+}
+
+% Custom commands
+\newcommand{\bulletlist}[1]{
+    \begin{itemize}[leftmargin=15pt,nosep,itemsep=2pt]
+        #1
+    \end{itemize}
+}
+
+\newcommand{\bulletitem}[1]{
+    \item[\color{accentBlue}\textbullet] #1
+}
+
+\newcommand{\fieldrow}[5]{
+    \texttt{#1} & #2 & #3 & #4 & #5 \\
+}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{mediumGray}People Information System -- Excel Import Template}
+\fancyhead[R]{\small\color{mediumGray}ProDG \& VGG Collaboration}
+\fancyfoot[C]{\small\color{mediumGray}Page \thepage\ of \pageref{LastPage}}
+\fancyfoot[R]{\small\color{mediumGray}Version 1.0 | December 2024}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+
+% ===== Header with Logos =====
+\begin{center}
+    \begin{tabular}{@{}p{0.3\textwidth}@{}p{0.4\textwidth}@{}p{0.3\textwidth}@{}}
+        \begin{flushleft}
+            % Replace with ProDG logo
+            \includegraphics[height=2cm]{prodg-logo.png}
+        \end{flushleft}
+        &
+        &
+        \begin{flushright}
+            % Replace with VGG logo
+            \includegraphics[height=2cm]{vgg-logo.png}
+        \end{flushright}
+    \end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+
+\begin{headerbox}
+    \begin{center}
+        {\Huge\color{white}\textbf{PEOPLE INFORMATION SYSTEM}} \\
+        \vspace{0.3cm}
+        {\Large\color{white!90}Excel Data Import Template Specification} \\
+        \vspace{0.2cm}
+        {\normalsize\color{white!80}Standardized Data Collection Framework for Subsidiary Companies}
+    \end{center}
+\end{headerbox}
+
+\vspace{0.4cm}
+
+% ===== Document Info =====
+\begin{infobox}
+    \begin{center}
+        \begin{tabular}{@{}l@{\hspace{2cm}}l@{\hspace{2cm}}l@{}}
+            \textcolor{accentBlue}{\faBuilding} \textbf{Project Owner} & 
+            \textcolor{accentBlue}{\faUsers} \textbf{Implementation} & 
+            \textcolor{accentBlue}{\faCalendarAlt} \textbf{Version} \\
+            PeopleOS -- Victor Ephraim & 
+            ProDG \& Garden Ventures & 
+            1.0 -- December 2024 \\[0.3cm]
+            
+            \textcolor{accentBlue}{\faUserTie} \textbf{Project Manager} & 
+            \textcolor{accentBlue}{\faFileAlt} \textbf{Document Type} & 
+            \textcolor{accentBlue}{\faLock} \textbf{Classification} \\
+            Melissa Omede & 
+            Technical Specification & 
+            Internal Use Only
+        \end{tabular}
+    \end{center}
+\end{infobox}
+
+\vspace{0.5cm}
+
+% ===== Executive Summary =====
+\begin{successbox}
+    \textbf{\color{successGreen}\Large \faFileExcel \quad EXECUTIVE SUMMARY}
+    \vspace{0.3cm}
+    
+    This document defines the standardized Excel template for importing employee and organizational data from VGG subsidiary companies that do not utilize SeamlessHR or KlevaHR platforms. The template ensures data consistency, enables seamless integration with the People Information System database, and supports group-wide workforce analytics and reporting capabilities.
+    
+    \vspace{0.2cm}
+    
+    \textbf{Collaboration Framework:} ProDG provides technical implementation and database architecture, while VGG subsidiaries collect and submit data using this standardized format. This partnership ensures data quality, security, and analytical readiness across all portfolio companies.
+\end{successbox}
+
+\vspace{0.5cm}
+
+% ===== Table of Contents =====
+\section*{\faListAlt \quad Table of Contents}
+\begin{enumerate}[leftmargin=20pt]
+    \item Workbook Structure Overview
+    \item Sheet 1: Company Information
+    \item Sheet 2: Employee Master Data
+    \item Sheet 3: Departments
+    \item Sheet 4: Job Roles
+    \item Sheet 5: Leave Records
+    \item Sheet 6: Attendance Records
+    \item Data Validation Rules
+    \item Import Checklist
+\end{enumerate}
+
+\newpage
+
+% ===== Section 1: Workbook Structure =====
+\section{\faFolderOpen \quad Workbook Structure Overview}
+
+The Excel workbook must contain \textbf{six (6) standardized sheets}. Each sheet serves a specific purpose in the data collection process:
+
+\vspace{0.3cm}
+
+\begin{center}
+\begin{tabular}{@{}clll@{}}
+    \toprule
+    \textbf{Sheet \#} & \textbf{Sheet Name} & \textbf{Purpose} & \textbf{Required} \\
+    \midrule
+    1 & \texttt{Company\_Info} & Company/subsidiary metadata & Yes \\
+    2 & \texttt{Employees} & Core employee records & Yes \\
+    3 & \texttt{Departments} & Organizational structure & Yes \\
+    4 & \texttt{Job\_Roles} & Position definitions & Recommended \\
+    5 & \texttt{Leave\_Records} & Leave/time-off history & Optional \\
+    6 & \texttt{Attendance} & Attendance tracking & Optional \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{importantbox}
+    \textbf{\color{vggRed}\faExclamationTriangle \quad Important Notes:}
+    \bulletlist{
+        \bulletitem{Sheet names must match \textbf{exactly} as specified (case-sensitive)}
+        \bulletitem{Do not add extra sheets or rename existing sheets}
+        \bulletitem{All dates must use \texttt{YYYY-MM-DD} format}
+        \bulletitem{Boolean fields must use \texttt{TRUE} or \texttt{FALSE} only}
+        \bulletitem{No empty rows between data rows}
+    }
+\end{importantbox}
+
+\vspace{0.5cm}
+
+% ===== Section 2: Company Info =====
+\section{\faBuilding \quad Sheet 1: Company Information}
+
+\begin{sheetbox}{Company\_Info}
+Basic metadata about the subsidiary company. \textbf{Only one row of data required.}
+\end{sheetbox}
+
+\vspace{0.3cm}
+
+\begin{longtable}{@{}p{3cm}p{2cm}p{1.2cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Data Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Field Name} & \textbf{Data Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    \endhead
+    
+    \texttt{company\_name} & Text & Yes & Official registered company name \newline \textit{Example: ``Acme Holdings Ltd''} \\
+    \midrule
+    \texttt{company\_code} & Text & Yes & Unique identifier for the company \newline \textit{Example: ``ACME001''} \\
+    \midrule
+    \texttt{description} & Text & No & Brief company description \newline \textit{Example: ``Manufacturing subsidiary''} \\
+    \midrule
+    \texttt{industry} & Text & No & Industry sector \newline \textit{Example: ``Manufacturing''} \\
+    \midrule
+    \texttt{headquarters\_location} & Text & No & Main office location \newline \textit{Example: ``Lagos, Nigeria''} \\
+    \midrule
+    \texttt{date\_established} & Date & No & Company founding date \newline \textit{Example: ``2015-03-20''} \\
+    \midrule
+    \texttt{tax\_id} & Text & No & Tax identification number \newline \textit{Example: ``TIN123456789''} \\
+    \midrule
+    \texttt{registration\_number} & Text & No & Corporate registration number \newline \textit{Example: ``RC123456''} \\
+    \midrule
+    \texttt{contact\_email} & Email & No & Primary contact email \newline \textit{Example: ``info@acme.com''} \\
+    \midrule
+    \texttt{contact\_phone} & Text & No & Primary contact phone \newline \textit{Example: ``+234 801 234 5678''} \\
+    \midrule
+    \texttt{website} & URL & No & Company website \newline \textit{Example: ``https://acme.com''} \\
+    \midrule
+    \texttt{parent\_company} & Text & No & Parent company name \newline \textit{Example: ``VGG Holdings''} \\
+    \midrule
+    \texttt{reporting\_currency} & Text & No & Default currency code \newline \textit{Example: ``NGN''} \\
+    \midrule
+    \texttt{fiscal\_year\_end} & Text & No & Fiscal year end month \newline \textit{Example: ``December''} \\
+    \bottomrule
+\end{longtable}
+
+\newpage
+
+% ===== Section 3: Employees =====
+\section{\faUserFriends \quad Sheet 2: Employee Master Data}
+
+\begin{sheetbox}{Employees}
+Core employee records -- this is the \textbf{primary data sheet} containing comprehensive workforce information.
+\end{sheetbox}
+
+\vspace{0.3cm}
+
+\subsection{Basic Information}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    \endfirsthead
+    
+    \texttt{employee\_code} & Text & Yes & Unique employee identifier \newline \textit{Example: ``EMP001''} \\
+    \midrule
+    \texttt{first\_name} & Text & Yes & Legal first name \newline \textit{Example: ``Adebayo''} \\
+    \midrule
+    \texttt{last\_name} & Text & Yes & Legal surname \newline \textit{Example: ``Okonkwo''} \\
+    \midrule
+    \texttt{other\_names} & Text & No & Middle/other names \newline \textit{Example: ``Chukwu''} \\
+    \midrule
+    \texttt{email} & Email & Yes & Work email address \newline \textit{Example: ``adebayo@company.com''} \\
+    \midrule
+    \texttt{personal\_email} & Email & No & Personal email address \newline \textit{Example: ``adebayo@gmail.com''} \\
+    \midrule
+    \texttt{phone\_number} & Text & No & Primary phone with country code \newline \textit{Example: ``+234 801 234 5678''} \\
+    \midrule
+    \texttt{alternative\_phone} & Text & No & Secondary phone number \newline \textit{Example: ``+234 802 345 6789''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Demographics}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{gender} & Text & Yes & Gender identity \newline \textit{Values: ``Male'' / ``Female'' / ``Other''} \\
+    \midrule
+    \texttt{date\_of\_birth} & Date & No & Birth date (YYYY-MM-DD) \newline \textit{Example: ``1985-06-15''} \\
+    \midrule
+    \texttt{marital\_status} & Text & No & Marital status \newline \textit{Values: ``Single'' / ``Married'' / ``Divorced'' / ``Widowed''} \\
+    \midrule
+    \texttt{nationality} & Text & No & Nationality \newline \textit{Example: ``Nigerian''} \\
+    \midrule
+    \texttt{state\_of\_origin} & Text & No & State of origin \newline \textit{Example: ``Lagos''} \\
+    \midrule
+    \texttt{local\_government} & Text & No & Local Government Area \newline \textit{Example: ``Ikeja''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Address Information}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{residential\_address} & Text & No & Full home address \newline \textit{Example: ``123 Main Street, Ikeja''} \\
+    \midrule
+    \texttt{city} & Text & No & City of residence \newline \textit{Example: ``Lagos''} \\
+    \midrule
+    \texttt{state} & Text & No & State of residence \newline \textit{Example: ``Lagos State''} \\
+    \midrule
+    \texttt{country} & Text & No & Country \newline \textit{Example: ``Nigeria''} \\
+    \midrule
+    \texttt{postal\_code} & Text & No & Postal/ZIP code \newline \textit{Example: ``100001''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Employment Details}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{department} & Text & Yes & Department name \newline \textit{Example: ``Engineering''} \\
+    \midrule
+    \texttt{department\_code} & Text & No & Department code \newline \textit{Example: ``ENG''} \\
+    \midrule
+    \texttt{job\_role} & Text & Yes & Job title/role \newline \textit{Example: ``Senior Software Engineer''} \\
+    \midrule
+    \texttt{job\_role\_code} & Text & No & Job role code \newline \textit{Example: ``SSE001''} \\
+    \midrule
+    \texttt{position} & Text & No & Position/level \newline \textit{Example: ``Senior''} \\
+    \midrule
+    \texttt{grade\_level} & Text & No & Grade/band level \newline \textit{Example: ``Grade 5''} \\
+    \midrule
+    \texttt{employment\_type} & Text & Yes & Type of employment \newline \textit{Values: ``Full-time'' / ``Part-time'' / ``Contract'' / ``Intern''} \\
+    \midrule
+    \texttt{contract\_type} & Text & No & Contract classification \newline \textit{Values: ``Permanent'' / ``Fixed-term'' / ``Temporary''} \\
+    \midrule
+    \texttt{contract\_start\_date} & Date & No & Contract start date \newline \textit{Example: ``2020-01-01''} \\
+    \midrule
+    \texttt{contract\_end\_date} & Date & No & Contract end date \newline \textit{Example: ``2024-12-31''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Dates \& Status}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{employment\_date} & Date & Yes & Hire/start date \newline \textit{Example: ``2020-03-15''} \\
+    \midrule
+    \texttt{confirmation\_date} & Date & No & Confirmation date \newline \textit{Example: ``2020-06-15''} \\
+    \midrule
+    \texttt{probation\_end\_date} & Date & No & End of probation period \newline \textit{Example: ``2020-06-15''} \\
+    \midrule
+    \texttt{status} & Text & Yes & Employment status \newline \textit{Values: ``active'' / ``inactive'' / ``suspended'' / ``on\_leave''} \\
+    \midrule
+    \texttt{is\_active} & Boolean & Yes & Currently active employee? \newline \textit{Values: ``TRUE'' / ``FALSE''} \\
+    \midrule
+    \texttt{exit\_date} & Date & No & Last working day \newline \textit{Example: ``2024-01-31''} \\
+    \midrule
+    \texttt{exit\_reason} & Text & No & Reason for exit \newline \textit{Values: ``Resignation'' / ``Termination'' / ``Retirement''} \\
+    \midrule
+    \texttt{is\_exited} & Boolean & No & Has left the company? \newline \textit{Values: ``TRUE'' / ``FALSE''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Location \& Reporting}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{branch} & Text & Yes & Work location/branch \newline \textit{Example: ``Lagos HQ''} \\
+    \midrule
+    \texttt{branch\_code} & Text & No & Branch code \newline \textit{Example: ``LG001''} \\
+    \midrule
+    \texttt{cost\_center} & Text & No & Cost center allocation \newline \textit{Example: ``CC-ENG-001''} \\
+    \midrule
+    \texttt{reporting\_manager} & Text & No & Manager's employee code \newline \textit{Example: ``EMP002''} \\
+    \midrule
+    \texttt{reporting\_manager\_name} & Text & No & Manager's full name \newline \textit{Example: ``John Doe''} \\
+    \midrule
+    \texttt{work\_schedule} & Text & No & Schedule type \newline \textit{Values: ``FULLTIME'' / ``ROTATIONAL'' / ``SHIFT''} \\
+    \midrule
+    \texttt{work\_hours\_per\_week} & Number & No & Weekly work hours \newline \textit{Example: ``40''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Identification \& Documents}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{national\_id} & Text & No & National ID (NIN) \newline \textit{Example: ``NIN123456789''} \\
+    \midrule
+    \texttt{passport\_number} & Text & No & Passport number \newline \textit{Example: ``A12345678''} \\
+    \midrule
+    \texttt{passport\_expiry} & Date & No & Passport expiry date \newline \textit{Example: ``2030-12-31''} \\
+    \midrule
+    \texttt{drivers\_license} & Text & No & Driver's license number \newline \textit{Example: ``DL123456''} \\
+    \midrule
+    \texttt{tax\_id} & Text & No & Tax identification \newline \textit{Example: ``TIN123456''} \\
+    \midrule
+    \texttt{pension\_number} & Text & No & Pension/RSA number \newline \textit{Example: ``PEN123456''} \\
+    \midrule
+    \texttt{pension\_fund\_admin} & Text & No & PFA name \newline \textit{Example: ``ARM Pension''} \\
+    \midrule
+    \texttt{nhf\_number} & Text & No & National Housing Fund number \newline \textit{Example: ``NHF123456''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Bank \& Payment Information}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{bank\_name} & Text & No & Bank name \newline \textit{Example: ``First Bank''} \\
+    \midrule
+    \texttt{bank\_account\_number} & Text & No & Account number (NUBAN) \newline \textit{Example: ``0123456789''} \\
+    \midrule
+    \texttt{bank\_account\_name} & Text & No & Account holder name \newline \textit{Example: ``Adebayo Okonkwo''} \\
+    \midrule
+    \texttt{bank\_branch} & Text & No & Bank branch \newline \textit{Example: ``Victoria Island''} \\
+    \midrule
+    \texttt{bank\_sort\_code} & Text & No & Sort code \newline \textit{Example: ``011151003''} \\
+    \midrule
+    \texttt{payment\_method} & Text & No & Payment method \newline \textit{Values: ``Bank Transfer'' / ``Cash'' / ``Cheque''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Compensation}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{basic\_salary} & Number & No & Monthly basic salary (numbers only) \newline \textit{Example: ``500000''} \\
+    \midrule
+    \texttt{gross\_salary} & Number & No & Monthly gross salary \newline \textit{Example: ``650000''} \\
+    \midrule
+    \texttt{currency} & Text & No & Salary currency \newline \textit{Example: ``NGN''} \\
+    \midrule
+    \texttt{pay\_grade} & Text & No & Pay grade/band \newline \textit{Example: ``L5''} \\
+    \midrule
+    \texttt{salary\_effective\_date} & Date & No & Salary effective from \newline \textit{Example: ``2024-01-01''} \\
+    \midrule
+    \texttt{housing\_allowance} & Number & No & Housing allowance \newline \textit{Example: ``75000''} \\
+    \midrule
+    \texttt{transport\_allowance} & Number & No & Transport allowance \newline \textit{Example: ``50000''} \\
+    \midrule
+    \texttt{meal\_allowance} & Number & No & Meal allowance \newline \textit{Example: ``25000''} \\
+    \midrule
+    \texttt{other\_allowances} & Number & No & Other allowances total \newline \textit{Example: ``0''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Emergency Contact}
+
+\begin{longtable}{@{}p{4cm}p{1.8cm}p{1cm}p{6cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{emergency\_contact\_name} & Text & No & Emergency contact name \newline \textit{Example: ``Jane Okonkwo''} \\
+    \midrule
+    \texttt{emergency\_contact\_relationship} & Text & No & Relationship \newline \textit{Values: ``Spouse'' / ``Parent'' / ``Sibling''} \\
+    \midrule
+    \texttt{emergency\_contact\_phone} & Text & No & Emergency phone \newline \textit{Example: ``+234 803 456 7890''} \\
+    \midrule
+    \texttt{emergency\_contact\_address} & Text & No & Emergency contact address \newline \textit{Example: ``456 Other Street, Lagos''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Next of Kin}
+
+\begin{longtable}{@{}p{4cm}p{1.8cm}p{1cm}p{6cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{next\_of\_kin\_name} & Text & No & Next of kin full name \newline \textit{Example: ``Jane Okonkwo''} \\
+    \midrule
+    \texttt{next\_of\_kin\_relationship} & Text & No & Relationship \newline \textit{Example: ``Spouse''} \\
+    \midrule
+    \texttt{next\_of\_kin\_phone} & Text & No & Next of kin phone \newline \textit{Example: ``+234 803 456 7890''} \\
+    \midrule
+    \texttt{next\_of\_kin\_address} & Text & No & Next of kin address \newline \textit{Example: ``456 Other Street, Lagos''} \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Education \& Qualifications}
+
+\begin{longtable}{@{}p{4cm}p{1.8cm}p{1cm}p{6cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{highest\_qualification} & Text & No & Highest education level \newline \textit{Example: ``Bachelor's Degree''} \\
+    \midrule
+    \texttt{institution} & Text & No & Institution name \newline \textit{Example: ``University of Lagos''} \\
+    \midrule
+    \texttt{course\_of\_study} & Text & No & Field of study \newline \textit{Example: ``Computer Science''} \\
+    \midrule
+    \texttt{graduation\_year} & Number & No & Year of graduation \newline \textit{Example: ``2010''} \\
+    \midrule
+    \texttt{professional\_certifications} & Text & No & Certifications (comma-separated) \newline \textit{Example: ``PMP, AWS Solutions Architect''} \\
+    \bottomrule
+\end{longtable}
+
+\newpage
+
+% ===== Section 4: Departments =====
+\section{\faSitemap \quad Sheet 3: Departments}
+
+\begin{sheetbox}{Departments}
+Department and organizational structure definitions. Each row represents one department.
+\end{sheetbox}
+
+\vspace{0.3cm}
+
+\begin{longtable}{@{}p{4cm}p{1.8cm}p{1cm}p{6cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{department\_code} & Text & Yes & Unique department code \newline \textit{Example: ``ENG001''} \\
+    \midrule
+    \texttt{department\_name} & Text & Yes & Department name \newline \textit{Example: ``Engineering''} \\
+    \midrule
+    \texttt{description} & Text & No & Department description \newline \textit{Example: ``Software development team''} \\
+    \midrule
+    \texttt{department\_tag} & Text & No & Category tag \newline \textit{Values: ``department'' / ``directorate'' / ``division'' / ``unit''} \\
+    \midrule
+    \texttt{parent\_department} & Text & No & Parent department code \newline \textit{Example: ``TECH001''} \\
+    \midrule
+    \texttt{head\_of\_department} & Text & No & HOD employee code \newline \textit{Example: ``EMP001''} \\
+    \midrule
+    \texttt{head\_of\_department\_name} & Text & No & HOD full name \newline \textit{Example: ``John Doe''} \\
+    \midrule
+    \texttt{is\_regional} & Boolean & No & Regional department? \newline \textit{Values: ``TRUE'' / ``FALSE''} \\
+    \midrule
+    \texttt{location} & Text & No & Primary location \newline \textit{Example: ``Lagos HQ''} \\
+    \midrule
+    \texttt{cost\_center} & Text & No & Cost center code \newline \textit{Example: ``CC-ENG''} \\
+    \midrule
+    \texttt{is\_active} & Boolean & Yes & Currently active? \newline \textit{Values: ``TRUE'' / ``FALSE''} \\
+    \bottomrule
+\end{longtable}
+
+\vspace{0.5cm}
+
+% ===== Section 5: Job Roles =====
+\section{\faBriefcase \quad Sheet 4: Job Roles}
+
+\begin{sheetbox}{Job\_Roles}
+Job role and position definitions with compensation ranges.
+\end{sheetbox}
+
+\vspace{0.3cm}
+
+\begin{longtable}{@{}p{4cm}p{1.8cm}p{1cm}p{6cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{job\_role\_code} & Text & Yes & Unique role code \newline \textit{Example: ``SSE001''} \\
+    \midrule
+    \texttt{job\_role\_name} & Text & Yes & Role title \newline \textit{Example: ``Senior Software Engineer''} \\
+    \midrule
+    \texttt{description} & Text & No & Role description \newline \textit{Example: ``Leads development projects''} \\
+    \midrule
+    \texttt{department} & Text & No & Associated department \newline \textit{Example: ``Engineering''} \\
+    \midrule
+    \texttt{department\_code} & Text & No & Department code \newline \textit{Example: ``ENG001''} \\
+    \midrule
+    \texttt{job\_family} & Text & No & Job family/category \newline \textit{Example: ``Technology''} \\
+    \midrule
+    \texttt{grade\_level} & Text & No & Grade/band \newline \textit{Example: ``L5''} \\
+    \midrule
+    \texttt{pay\_grade\_min} & Number & No & Minimum salary range \newline \textit{Example: ``400000''} \\
+    \midrule
+    \texttt{pay\_grade\_max} & Number & No & Maximum salary range \newline \textit{Example: ``700000''} \\
+    \midrule
+    \texttt{is\_management} & Boolean & No & Management position? \newline \textit{Values: ``TRUE'' / ``FALSE''} \\
+    \midrule
+    \texttt{is\_active} & Boolean & Yes & Currently active? \newline \textit{Values: ``TRUE'' / ``FALSE''} \\
+    \bottomrule
+\end{longtable}
+
+\newpage
+
+% ===== Section 6: Leave Records =====
+\section{\faCalendarCheck \quad Sheet 5: Leave Records}
+
+\begin{sheetbox}{Leave\_Records}
+Employee leave and time-off history. Each row represents one leave request.
+\end{sheetbox}
+
+\vspace{0.3cm}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{leave\_id} & Text & Yes & Unique leave record ID \newline \textit{Example: ``LV-2024-001''} \\
+    \midrule
+    \texttt{employee\_code} & Text & Yes & Employee code \newline \textit{Example: ``EMP001''} \\
+    \midrule
+    \texttt{employee\_name} & Text & No & Employee full name \newline \textit{Example: ``Adebayo Okonkwo''} \\
+    \midrule
+    \texttt{leave\_type} & Text & Yes & Type of leave \newline \textit{Values: ``Annual'' / ``Sick'' / ``Maternity'' / ``Paternity'' / ``Study'' / ``Compassionate''} \\
+    \midrule
+    \texttt{start\_date} & Date & Yes & Leave start date \newline \textit{Example: ``2024-02-01''} \\
+    \midrule
+    \texttt{end\_date} & Date & Yes & Leave end date \newline \textit{Example: ``2024-02-05''} \\
+    \midrule
+    \texttt{days\_requested} & Number & Yes & Number of days \newline \textit{Example: ``5''} \\
+    \midrule
+    \texttt{days\_approved} & Number & No & Days approved \newline \textit{Example: ``5''} \\
+    \midrule
+    \texttt{status} & Text & Yes & Request status \newline \textit{Values: ``PENDING'' / ``APPROVED'' / ``REJECTED'' / ``CANCELLED'' / ``ON LEAVE''} \\
+    \midrule
+    \texttt{reason} & Text & No & Leave reason \newline \textit{Example: ``Family vacation''} \\
+    \midrule
+    \texttt{resumption\_date} & Date & No & Expected return date \newline \textit{Example: ``2024-02-06''} \\
+    \midrule
+    \texttt{approved\_by} & Text & No & Approver employee code \newline \textit{Example: ``EMP002''} \\
+    \midrule
+    \texttt{approval\_date} & Date & No & Date approved \newline \textit{Example: ``2024-01-25''} \\
+    \midrule
+    \texttt{year} & Number & Yes & Leave year \newline \textit{Example: ``2024''} \\
+    \bottomrule
+\end{longtable}
+
+\vspace{0.5cm}
+
+% ===== Section 7: Attendance =====
+\section{\faClock \quad Sheet 6: Attendance Records}
+
+\begin{sheetbox}{Attendance}
+Daily attendance tracking. Each row represents one day's attendance for one employee.
+\end{sheetbox}
+
+\vspace{0.3cm}
+
+\begin{longtable}{@{}p{3.5cm}p{1.8cm}p{1cm}p{6.5cm}@{}}
+    \toprule
+    \textbf{Field Name} & \textbf{Type} & \textbf{Req.} & \textbf{Description \& Example} \\
+    \midrule
+    
+    \texttt{employee\_code} & Text & Yes & Employee code \newline \textit{Example: ``EMP001''} \\
+    \midrule
+    \texttt{date} & Date & Yes & Attendance date \newline \textit{Example: ``2024-01-15''} \\
+    \midrule
+    \texttt{schedule\_type} & Text & No & Schedule type \newline \textit{Values: ``FULLTIME'' / ``ROTATIONAL''} \\
+    \midrule
+    \texttt{scheduled\_clock\_in} & Time & No & Expected clock-in time (HH:MM) \newline \textit{Example: ``09:00''} \\
+    \midrule
+    \texttt{scheduled\_clock\_out} & Time & No & Expected clock-out time (HH:MM) \newline \textit{Example: ``17:00''} \\
+    \midrule
+    \texttt{actual\_clock\_in} & Time & No & Actual clock-in time \newline \textit{Example: ``08:55''} \\
+    \midrule
+    \texttt{actual\_clock\_out} & Time & No & Actual clock-out time \newline \textit{Example: ``17:30''} \\
+    \midrule
+    \texttt{clock\_in\_source} & Text & No & Clock-in method \newline \textit{Values: ``Biometric'' / ``Mobile'' / ``Web'' / ``Manual''} \\
+    \midrule
+    \texttt{hours\_worked} & Number & No & Hours worked (decimal) \newline \textit{Example: ``8.5''} \\
+    \midrule
+    \texttt{overtime\_hours} & Number & No & Overtime hours \newline \textit{Example: ``0.5''} \\
+    \midrule
+    \texttt{punctuality\_status} & Text & No & Punctuality \newline \textit{Values: ``On Time'' / ``Late'' / ``Early'' / ``Absent''} \\
+    \midrule
+    \texttt{attendance\_status} & Text & Yes & Attendance status \newline \textit{Values: ``Present'' / ``Absent'' / ``Leave'' / ``Holiday''} \\
+    \bottomrule
+\end{longtable}
+
+\newpage
+
+% ===== Section 8: Data Validation =====
+\section{\faCheckDouble \quad Data Validation Rules}
+
+\subsection{Required Fields Priority}
+
+\begin{successbox}
+\textbf{\color{successGreen}Critical Fields (Must Have):}
+\bulletlist{
+    \bulletitem{\texttt{employee\_code} -- Unique identifier for each employee}
+    \bulletitem{\texttt{first\_name}, \texttt{last\_name} -- Employee legal name}
+    \bulletitem{\texttt{email} -- Work email address}
+    \bulletitem{\texttt{gender} -- Gender identity}
+    \bulletitem{\texttt{department} -- Department assignment}
+    \bulletitem{\texttt{job\_role} -- Job title/position}
+    \bulletitem{\texttt{employment\_type} -- Full-time/Part-time/Contract/Intern}
+    \bulletitem{\texttt{employment\_date} -- Hire date}
+    \bulletitem{\texttt{status}, \texttt{is\_active} -- Employment status}
+    \bulletitem{\texttt{branch} -- Work location}
+}
+\end{successbox}
+
+\subsection{Standard Dropdown Values}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Field} & \textbf{Allowed Values} \\
+    \midrule
+    \texttt{gender} & Male, Female, Other \\
+    \texttt{employment\_type} & Full-time, Part-time, Contract, Intern \\
+    \texttt{contract\_type} & Permanent, Fixed-term, Temporary \\
+    \texttt{status} & active, inactive, suspended, on\_leave, terminated \\
+    \texttt{leave\_status} & PENDING, APPROVED, REJECTED, CANCELLED, ON LEAVE \\
+    \texttt{leave\_type} & Annual, Sick, Maternity, Paternity, Study, Compassionate \\
+    \texttt{attendance\_status} & Present, Absent, Leave, Holiday, Weekend \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+% ===== Section 9: Checklist =====
+\section{\faClipboardCheck \quad Pre-Import Checklist}
+
+\begin{importantbox}
+Before submitting your Excel file, verify the following:
+
+\begin{enumerate}[leftmargin=20pt]
+    \item[$\square$] All required fields are populated for every employee
+    \item[$\square$] All dates are in \texttt{YYYY-MM-DD} format
+    \item[$\square$] Employee codes are unique (no duplicates)
+    \item[$\square$] Department names match exactly across all sheets
+    \item[$\square$] Email addresses are valid and unique
+    \item[$\square$] Status values match the allowed options exactly
+    \item[$\square$] Numbers are plain numbers (no currency symbols or commas)
+    \item[$\square$] Boolean fields use only \texttt{TRUE} or \texttt{FALSE}
+    \item[$\square$] No empty rows between data rows
+    \item[$\square$] Sheet names match exactly as specified
+    \item[$\square$] File saved as \texttt{.xlsx} format
+\end{enumerate}
+\end{importantbox}
+
+\vspace{1cm}
+
+% ===== Footer =====
+\begin{center}
+    \rule{0.8\textwidth}{0.4pt}
+    
+    \vspace{0.3cm}
+    
+    \textcolor{mediumGray}{\small\textbf{Document Version:} 1.0 \quad | \quad \textbf{Last Updated:} December 2024}
+    
+    \vspace{0.2cm}
+    
+    \textcolor{mediumGray}{\small For questions or support, contact the ProDG implementation team.}
+    
+    \vspace{0.3cm}
+    
+    \textcolor{accentBlue}{\small \textcopyright\ 2024 ProDG \& VGG Holdings. All rights reserved.}
+\end{center}
+
+\end{document}
