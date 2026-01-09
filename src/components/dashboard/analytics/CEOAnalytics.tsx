@@ -5,6 +5,9 @@ import { getCompanyMockData } from "@/lib/enhanced-mock-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import DataAvailabilityAlert from "../DataAvailabilityAlert";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 interface CEOAnalyticsProps {
   childCompany: string;
@@ -18,6 +21,7 @@ const CEOAnalytics = ({ childCompany }: CEOAnalyticsProps) => {
   const [branchData, setBranchData] = useState<any[]>([]);
   const [genderData, setGenderData] = useState<any[]>([]);
   const [tenureData, setTenureData] = useState<any[]>([]);
+  const [dataAvailable, setDataAvailable] = useState(true);
 
   useEffect(() => {
     loadAnalytics();
@@ -25,6 +29,7 @@ const CEOAnalytics = ({ childCompany }: CEOAnalyticsProps) => {
 
   const loadAnalytics = async () => {
     setLoading(true);
+    setDataAvailable(true);
     try {
       if (childCompany === "Seamless HR") {
         const employees = await getSeamlessHREmployees();
@@ -121,9 +126,34 @@ const CEOAnalytics = ({ childCompany }: CEOAnalyticsProps) => {
       }
     } catch (error) {
       console.error('Failed to load analytics:', error);
+      setDataAvailable(false);
       toast.error('Failed to load analytics data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const exportChartData = () => {
+    try {
+      const data = {
+        company: childCompany,
+        department: departmentData,
+        branch: branchData,
+        gender: genderData,
+        tenure: tenureData
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analytics_${childCompany.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Analytics data exported successfully');
+    } catch (error) {
+      toast.error('Failed to export analytics');
     }
   };
 
@@ -141,107 +171,123 @@ const CEOAnalytics = ({ childCompany }: CEOAnalyticsProps) => {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {/* Department Distribution */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">Workforce by Department</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={departmentData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
-            />
-            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
+    <div className="space-y-6">
+      {!dataAvailable && (
+        <DataAvailabilityAlert 
+          message={`Analytics data is not available for ${childCompany}. Please check your data sources or try a different company.`}
+          onRetry={loadAnalytics}
+        />
+      )}
+      
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={exportChartData}>
+          <Download className="w-4 h-4 mr-2" />
+          Export Analytics
+        </Button>
+      </div>
 
-      {/* Branch Distribution */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">Workforce by Location</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={branchData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              outerRadius={100}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {branchData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Department Distribution */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Workforce by Department</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={departmentData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
 
-      {/* Gender Distribution */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">Gender Diversity</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={genderData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
-              outerRadius={100}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {genderData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
-            />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      </Card>
+        {/* Branch Distribution */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Workforce by Location</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={branchData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {branchData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </Card>
 
-      {/* Tenure Distribution */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">Employee Tenure Distribution</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={tenureData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px'
-              }}
-            />
-            <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
+        {/* Gender Distribution */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Gender Diversity</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={genderData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {genderData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* Tenure Distribution */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Employee Tenure Distribution</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={tenureData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
     </div>
   );
 };

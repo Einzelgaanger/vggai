@@ -75,10 +75,12 @@ All demo users work for **VGG Holdings** and have different access levels to chi
 - **Endpoint**: `https://api.seamlesshr.com/v1`
 - **Data**: Real employee, payroll, attendance data
 
-### Kleva HR (Mock)
-- **Type**: Hardcoded mock data
-- **Reason**: Credentials not yet available
-- **Data**: Sample data for demo purposes
+### Kleva HR (Integration Ready)
+- **Type**: API integration available
+- **Status**: API documentation and Postman collection provided
+- **Authentication**: API key-based (contact Opeyemi Ogunsawo)
+- **Postman Collection**: https://api.postman.com/collections/971406-7ff12c3b-0f1f-4b1c-b05d-4644ea7d4ff0?access_key=PMAT-REDACTED
+- **Note**: See `KLEVAHR_INTEGRATION_GUIDE.md` for detailed integration steps
 
 ## Components
 
@@ -104,11 +106,12 @@ All demo users work for **VGG Holdings** and have different access levels to chi
 
 ## Future Implementation
 
-### When Kleva HR Credentials Arrive
-1. Add real credentials to `api_credentials` table
-2. Update API service to use live endpoint
-3. Remove mock data logic
-4. No code changes needed - just configuration
+### Kleva HR Integration (Ready to Start)
+1. ✅ API documentation available (Postman collection)
+2. Request API key from Opeyemi Ogunsawo (oogunsawo@swifta.com)
+3. Create `kleva-service.ts` and `kleva-api` edge function
+4. Add endpoints and credentials to database
+5. See `KLEVAHR_INTEGRATION_GUIDE.md` for complete steps
 
 ### Adding New Child Companies
 1. Add company to `companies` table
